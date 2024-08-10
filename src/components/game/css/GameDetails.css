@@ -1,0 +1,83 @@
+/* Ensure this file is linked in your GameDetails.js */
+.game-details {
+  padding: 20px;
+  text-align: left; /* Align text to the left */
+}
+
+.game-form {
+  display: flex;
+  flex-direction: column; /* Stack rows vertically */
+  gap: 10px; /* Space between rows */
+  max-width: 400px; /* Optional: Set a max-width to control form width */
+}
+
+.form-row {
+  display: flex;
+  align-items: center; /* Align items vertically centered */
+  gap: 10px; /* Space between label and input */
+}
+
+.game-form label {
+  flex: 1; /* Take up available space */
+  font-weight: bold;
+  margin: 0; /* Remove default margin */
+}
+
+.game-form input {
+  width: 80px; /* Width adjusted for thin inputs */
+  padding: 5px;
+  border: 1px solid #ccc; /* Default border color */
+}
+
+.game-form input.invalid {
+  border: 1px solid red; /* Red border for invalid inputs */
+}
+
+.shooters-section {
+  margin-bottom: 20px;
+}
+
+.buttons-container {
+  display: flex;
+  gap: 20px; /* Space between buttons */
+  justify-content: flex-start; /* Align buttons to the left */
+}
+
+.start-shooting-button {
+  background-color: blue;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.start-shooting-button.disabled {
+  background-color: grey;
+  cursor: not-allowed;
+}
+
+.back-button {
+  background-color: lightgrey;
+  color: black;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.error-messages {
+  color: red;
+  margin-top: 20px;
+}
+
+.error-messages ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.error-messages li {
+  margin-bottom: 5px;
+}
