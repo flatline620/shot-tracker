@@ -112,6 +112,10 @@ const RecordShots = () => {
     return calculateCurrentStationShots().length < initialShots[currentStation - 1];
   };
 
+  const handleCancelShooter = () => {
+    navigate('/scoreboard', { state: { game } }); // Navigate to scoreboard without saving changes
+  };
+
   return (
     <div className="record-shots">
       <h1>Record Shots for {shooter.name}</h1>
@@ -135,7 +139,7 @@ const RecordShots = () => {
           </select>
         </label>
       </div>
-      <div>
+      <div className="button-container">
         <button
           className="shot-button hit"
           onClick={() => handleRecordShot(true)}
@@ -175,9 +179,14 @@ const RecordShots = () => {
           </div>
         ))}
       </div>
-      <button className="record-button" onClick={handleRecordShots}>
-        Record Shots
-      </button>
+      <div className="button-container">
+        <button className="record-button" onClick={handleRecordShots}>
+          Record Shots
+        </button>
+        <button className="return-button" onClick={handleCancelShooter}>
+          Cancel Shooter
+        </button>
+      </div>
     </div>
   );
 };
