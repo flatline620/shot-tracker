@@ -1,70 +1,65 @@
-# Getting Started with Create React App
+Conversation history with Chat CPT
+i want to use vscode to create a new react application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+My code will need to be reactive to both desktop and mobile
 
-## Available Scripts
+i want my first page to show a grid that i can select an existing game or create a new game.  a game will consist of data properties name, data and location.  It should be a json object
 
-In the project directory, you can run:
+i load it and it says Cannot read properties of undefined (reading 'name')
 
-### `npm start`
+in my data set i ment date, not data
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+i would like to format as mm/dd/yyyy using moment.js
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+when i click the select game button, it should load a page that has the name location and date in the header and collect the following information, num of stations, min shots per station, max shots per station and total shots, all as whole numbers.  once all fields are supplied, the user can then click setup shooters button that will then show a component that will start with 0 shooters and have an add shooter button.  Once there is at least one shooter the user can add more shooters up to 4 or start game.  If I click Add Shooter, it should ask for the shooters name.  If I click start game it should show a game scoreboard component that for now can just say Scoreboard
 
-### `npm test`
+I still need the Add Game button
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+After new game is added, it should go to the game details page as if i had selected the game from the main screen
 
-### `npm run build`
+when I fill out the stations, min shots, max shots and total shots, that information should be added to the game.  if the data exists when I select the game, the fields should be filled in
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+From the scoreboard i should be able to go back to the game list
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+When i create a new game the numStations, minShots, maxShots and totalShots should update the game data to be used later
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+the new information is getting to the handleUpdateGame, but when I check the value of games after setGames, the values are still the old values
 
-### `npm run eject`
+I get a warning The 'game' logical expression could make the dependencies of useEffect Hook (at line 19) change on every render. To fix this, wrap the initialization of 'game' in its own useMemo() Hook
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+it still is showing the original data
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+I meant to say the Updated games log added earlier still shows the old data
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+in handleUpdateGame, it does not see i being equal to index and thus is not updating
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+is it possible that there is a type mismatch
 
-## Learn More
+how can i log the type of i and index
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+When I add a shooter, that should also get back to the game object and I should have the ability to remove a shooter
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+When I go to the scoreboard it should have a row for each shooter that shows the following information, shots taken, num hits max score possible
 
-### Code Splitting
+THere should be default data of all 0 to start the scoreboard
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+THe scoreboard is showing No Data Found
 
-### Analyzing the Bundle Size
+on the scoreboard, each shooter should also have a button that allows me to record their next shots.  the number of shots will vary from each station, default to 4.  On this page I should show all my shots recorded so far and allow me to record a hit or miss which can be tracked simply as true of false  When all shots taken I can press record shots button and go back to the scoreboard with the latest information
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+in recordshots, i get React Hook "useState" is called conditionally. on line 13 and 14
 
-### Making a Progressive Web App
+Instead of the dropdown and Add Shot button can I have a Green Button with a /  for hit and a red button with a O for miss
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+The buttons should be the same size and larger
 
-### Advanced Configuration
+For recorded shots lets make that a grid where each line represents a different station and lets use the same green / and red O.  The cells should be the same size, smaller lines can just show empty boxes that are light grey slightly transparent background and do not have to be as big as the buttons
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Put each station on a new line and do not reset the station number after every hit or miss
 
-### Deployment
+I am getting Line 10:9:  The 'shooter' logical expression could make the dependencies of useEffect Hook (at line 19) change on every render warning
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+for record shots i should pass in the station number and number of shots to take, we should always start with station 1 not 0, increment by one for the shooter each time they go to record shots and not allow more shots than passed in, for now pass in 4 shots for every station
 
-### `npm run build` fails to minify
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
