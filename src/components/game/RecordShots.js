@@ -23,7 +23,7 @@ const RecordShots = () => {
   useEffect(() => {
     setShots(shooter.shots || []);
     setCurrentStation(shooter.currentStation || initialStation);
-  }, [shooter.shots, shooter.currentStation]);
+  }, [shooter.shots, shooter.currentStation, initialStation]);
 
   useEffect(() => {
     setNewShot(prev => ({ ...prev, station: currentStation }));
@@ -74,7 +74,7 @@ const RecordShots = () => {
             shotsTaken: shots.length,
             numHits: shots.filter(s => s.hit).length,
             shots,
-            currentStation: remainingShots > 0 ? s.currentStation : Math.min(currentStation + 1, maxStations)
+            currentStation: remainingShots > 0 ? s.currentStation : findNextIncompleteStation()
           }
         : s
     );
@@ -83,10 +83,30 @@ const RecordShots = () => {
     navigate('/scoreboard', { state: { game: updatedGame } });
   };
 
+  const findNextIncompleteStation = () => {
+    // Find the next incomplete station
+    for (let i = 0; i < maxStations; i++) {
+      const station = i + 1;
+      const shotsAtStation = shots.filter(shot => shot.station === station).length;
+      if (shotsAtStation < initialShots[i]) {
+        return station;
+      }
+    }
+    return null; // All stations are complete
+  };
+
   const handleStationChange = (e) => {
     const newStation = parseInt(e.target.value, 10);
-    setSelectedStation(newStation);
-    setCurrentStation(newStation); // Set current station to the selected station
+    const isStationComplete = initialShots[newStation - 1] <= calculateCurrentStationShots().length;
+    
+    if (!isStationComplete) {
+      setSelectedStation(newStation);
+      setCurrentStation(newStation);
+    }
+  };
+
+  const isRecordingAllowed = () => {
+    return calculateCurrentStationShots().length < initialShots[currentStation - 1];
   };
 
   return (
@@ -100,22 +120,37 @@ const RecordShots = () => {
             onChange={handleStationChange}
             className="station-select"
           >
-            {Array.from({ length: maxStations }, (_, index) => (
-              <option key={index + 1} value={index + 1}>
-                Station {index + 1}
-              </option>
-            ))}
+            {Array.from({ length: maxStations }, (_, index) => {
+              const station = index + 1;
+              const isComplete = initialShots[index] <= shots.filter(shot => shot.station === station).length;
+              return (
+                <option key={station} value={station} disabled={isComplete}>
+                  Station {station}
+                </option>
+              );
+            })}
           </select>
         </label>
       </div>
       <div>
-        <button className="shot-button hit" onClick={() => handleRecordShot(true)}>
+        <button
+          className="shot-button hit"
+          onClick={() => handleRecordShot(true)}
+          disabled={!isRecordingAllowed()}
+        >
           /
         </button>
-        <button className="shot-button miss" onClick={() => handleRecordShot(false)}>
+        <button
+          className="shot-button miss"
+          onClick={() => handleRecordShot(false)}
+          disabled={!isRecordingAllowed()}
+        >
           O
         </button>
-        <button className="shot-button undo" onClick={handleUndoLastShot}>
+        <button
+          className="shot-button undo"
+          onClick={handleUndoLastShot}
+        >
           Undo
         </button>
       </div>
