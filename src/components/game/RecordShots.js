@@ -28,10 +28,15 @@ const RecordShots = () => {
     shots.filter(shot => shot.station === station + 1)
   );
 
+  // Calculate the current station shots and remaining shots
+  const calculateCurrentStationShots = () => {
+    return shots.filter(s => s.station === newShot.station);
+  };
+
   // Handler to record a shot (hit or miss)
   const handleRecordShot = (hit) => {
     if (newShot.station >= 1 && newShot.station <= maxStations) {
-      const stationShots = shots.filter(shot => shot.station === newShot.station);
+      const stationShots = calculateCurrentStationShots();
       if (stationShots.length < initialShots[newShot.station - 1]) {
         // Determine the index of the new shot
         const newShotIndex = stationShots.length;
@@ -48,20 +53,42 @@ const RecordShots = () => {
 
   // Handler to save recorded shots and navigate back to scoreboard
   const handleRecordShots = () => {
-    const updatedShooters = game.shooters.map((s) =>
-      s.name === shooter.name
-        ? {
-            ...s,
-            shotsTaken: shots.length,
-            numHits: shots.filter(s => s.hit).length,
-            shots,
-            currentStation: newShot.station + 1  // Update the station for this shooter
-          }
-        : s
-    );
+    const currentShots = calculateCurrentStationShots();
+    const totalShotsAtCurrentStation = initialShots[newShot.station - 1];
+    const remainingShots = totalShotsAtCurrentStation - currentShots.length;
 
-    const updatedGame = { ...game, shooters: updatedShooters };
-    navigate('/scoreboard', { state: { game: updatedGame } });
+    if (remainingShots > 0) {
+      // If there are remaining shots, do not move to the next station
+      const updatedShooters = game.shooters.map((s) =>
+        s.name === shooter.name
+          ? { 
+              ...s, 
+              shotsTaken: shots.length, 
+              numHits: shots.filter(s => s.hit).length, 
+              shots // No change in station
+            }
+          : s
+      );
+
+      const updatedGame = { ...game, shooters: updatedShooters };
+      navigate('/scoreboard', { state: { game: updatedGame } });
+    } else {
+      // No remaining shots, just record and move on
+      const updatedShooters = game.shooters.map((s) =>
+        s.name === shooter.name
+          ? { 
+              ...s, 
+              shotsTaken: shots.length, 
+              numHits: shots.filter(s => s.hit).length, 
+              shots, 
+              currentStation: newShot.station + 1 // Move to next station
+            }
+          : s
+      );
+
+      const updatedGame = { ...game, shooters: updatedShooters };
+      navigate('/scoreboard', { state: { game: updatedGame } });
+    }
   };
 
   return (
@@ -178,7 +205,7 @@ const RecordShots = () => {
         }}
         onClick={handleRecordShots}
       >
-        Record Shots and Return
+        Record Shots
       </button>
     </div>
   );
