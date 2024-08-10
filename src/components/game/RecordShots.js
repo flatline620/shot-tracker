@@ -24,7 +24,7 @@ const RecordShots = () => {
 
   // Create a grid of shots by station
   const maxStations = initialShots.length;
-  const shotsByStation = Array.from({ length: maxStations }, (_, station) => 
+  const shotsByStation = Array.from({ length: maxStations }, (_, station) =>
     shots.filter(shot => shot.station === station + 1)
   );
 
@@ -33,7 +33,9 @@ const RecordShots = () => {
     if (newShot.station >= 1 && newShot.station <= maxStations) {
       const stationShots = shots.filter(shot => shot.station === newShot.station);
       if (stationShots.length < initialShots[newShot.station - 1]) {
-        setShots([...shots, { ...newShot, hit }]);
+        // Determine the index of the new shot
+        const newShotIndex = stationShots.length;
+        setShots([...shots, { ...newShot, hit, shotIndex: newShotIndex }]);
         setNewShot({ station: newShot.station, hit: null }); // Keep station the same
       }
     }
@@ -48,11 +50,11 @@ const RecordShots = () => {
   const handleRecordShots = () => {
     const updatedShooters = game.shooters.map((s) =>
       s.name === shooter.name
-        ? { 
-            ...s, 
-            shotsTaken: shots.length, 
-            numHits: shots.filter(s => s.hit).length, 
-            shots, 
+        ? {
+            ...s,
+            shotsTaken: shots.length,
+            numHits: shots.filter(s => s.hit).length,
+            shots,
             currentStation: newShot.station + 1  // Update the station for this shooter
           }
         : s
@@ -141,19 +143,13 @@ const RecordShots = () => {
             gridTemplateColumns: `repeat(${initialShots[stationIndex] || 1}, 40px)`,
             gap: '5px'
           }}>
-            {stationShots.length === 0
-              ? <div style={{
-                  backgroundColor: 'lightgrey',
-                  opacity: 0.5,
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '5px'
-                }} />
-              : stationShots.map((shot, shotIndex) => (
+            {Array.from({ length: initialShots[stationIndex] }).map((_, shotIndex) => {
+              const shot = stationShots.find(s => s.shotIndex === shotIndex);
+              return (
                 <button
                   key={shotIndex}
                   style={{
-                    backgroundColor: shot.hit ? 'green' : 'red',
+                    backgroundColor: shot ? (shot.hit ? 'green' : 'red') : 'lightgrey',
                     color: 'white',
                     width: '40px',
                     height: '40px',
@@ -162,10 +158,10 @@ const RecordShots = () => {
                     cursor: 'default'
                   }}
                 >
-                  {shot.hit ? '/' : 'O'}
+                  {shot ? (shot.hit ? '/' : 'O') : '-'}
                 </button>
-              ))
-            }
+              );
+            })}
           </div>
         ))}
       </div>
