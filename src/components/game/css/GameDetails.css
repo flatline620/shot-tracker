@@ -81,3 +81,24 @@
 .error-messages li {
   margin-bottom: 5px;
 }
+
+.station-naming {
+  margin-top: 20px;
+}
+
+.station-naming .form-row {
+  margin-bottom: 10px;
+}
+
+.confirm-button {
+  background-color: #4CAF50; /* Green */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.confirm-button:hover {
+  background-color: #45a049; /* Darker green */
+}

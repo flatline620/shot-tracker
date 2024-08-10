@@ -20,6 +20,9 @@ const RecordShots = () => {
   const [selectedStation, setSelectedStation] = useState(initialStation);
   const [currentStation, setCurrentStation] = useState(initialStation);
 
+  // Use station names from the game object
+  const stationNames = game.stationNames || Array.from({ length: initialShots.length }, (_, i) => `Station ${i + 1}`);
+
   useEffect(() => {
     setShots(shooter.shots || []);
     setCurrentStation(shooter.currentStation || initialStation);
@@ -120,12 +123,12 @@ const RecordShots = () => {
             onChange={handleStationChange}
             className="station-select"
           >
-            {Array.from({ length: maxStations }, (_, index) => {
+            {stationNames.map((name, index) => {
               const station = index + 1;
               const isComplete = initialShots[index] <= shots.filter(shot => shot.station === station).length;
               return (
                 <option key={station} value={station} disabled={isComplete}>
-                  Station {station}
+                  {name}
                 </option>
               );
             })}

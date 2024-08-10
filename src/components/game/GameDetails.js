@@ -16,12 +16,17 @@ const GameDetails = ({ games, onUpdateGame }) => {
   const [shooters, setShooters] = useState(game.shooters || []);
   const [newShooter, setNewShooter] = useState('');
 
+  // State for station naming
+  const [stationNames, setStationNames] = useState(Array(game.numStations || 1).fill(''));
+  const [isNamingStations, setIsNamingStations] = useState(false);
+
   useEffect(() => {
     setNumStations(game.numStations || '');
     setMinShots(game.minShots || '');
     setMaxShots(game.maxShots || '');
     setTotalShots(game.totalShots || '');
     setShooters(game.shooters || []);
+    setStationNames(Array(game.numStations || 1).fill('')); // Reset station names
   }, [game]);
 
   // Function to validate form fields
@@ -36,19 +41,32 @@ const GameDetails = ({ games, onUpdateGame }) => {
   };
 
   const handleStartShooting = () => {
+    if (validateForm()) {
+      setIsNamingStations(true);
+    }
+  };
+
+  const handleStationNameChange = (index, name) => {
+    const updatedStationNames = [...stationNames];
+    updatedStationNames[index] = name;
+    setStationNames(updatedStationNames);
+  };
+
+  const handleConfirmStationNames = () => {
     const updatedGame = {
       ...game,
       numStations: parseInt(numStations, 10),
       minShots: parseInt(minShots, 10),
       maxShots: parseInt(maxShots, 10),
       totalShots: parseInt(totalShots, 10),
-      shooters
+      shooters,
+      stationNames // Add station names here
     };
-
+  
     onUpdateGame(index, updatedGame);
     navigate('/scoreboard', { state: { game: updatedGame } });
   };
-
+  
   const handleAddShooter = () => {
     if (newShooter.trim() && shooters.length < 4) {
       setShooters([...shooters, {
@@ -74,106 +92,134 @@ const GameDetails = ({ games, onUpdateGame }) => {
       <p>Location: {game.location}</p>
       <p>Date: {game.date}</p>
 
-      <form className="game-form">
-        <div className="form-row">
-          <label htmlFor="numStations">Number of Stations:</label>
-          <input
-            id="numStations"
-            type="number"
-            value={numStations}
-            onChange={(e) => setNumStations(e.target.value)}
-            className={numStations <= 0 ? 'invalid' : ''}
-            required
-          />
-        </div>
+      {!isNamingStations ? (
+        <>
+          <form className="game-form">
+            <div className="form-row">
+              <label htmlFor="numStations">Number of Stations:</label>
+              <input
+                id="numStations"
+                type="number"
+                value={numStations}
+                onChange={(e) => setNumStations(e.target.value)}
+                className={numStations <= 0 ? 'invalid' : ''}
+                required
+              />
+            </div>
 
-        <div className="form-row">
-          <label htmlFor="minShots">Min Shots per Station:</label>
-          <input
-            id="minShots"
-            type="number"
-            value={minShots}
-            onChange={(e) => setMinShots(e.target.value)}
-            className={minShots <= 0 ? 'invalid' : ''}
-            required
-          />
-        </div>
+            <div className="form-row">
+              <label htmlFor="minShots">Min Shots per Station:</label>
+              <input
+                id="minShots"
+                type="number"
+                value={minShots}
+                onChange={(e) => setMinShots(e.target.value)}
+                className={minShots <= 0 ? 'invalid' : ''}
+                required
+              />
+            </div>
 
-        <div className="form-row">
-          <label htmlFor="maxShots">Max Shots per Station:</label>
-          <input
-            id="maxShots"
-            type="number"
-            value={maxShots}
-            onChange={(e) => setMaxShots(e.target.value)}
-            className={maxShots <= 0 ? 'invalid' : ''}
-            required
-          />
-        </div>
+            <div className="form-row">
+              <label htmlFor="maxShots">Max Shots per Station:</label>
+              <input
+                id="maxShots"
+                type="number"
+                value={maxShots}
+                onChange={(e) => setMaxShots(e.target.value)}
+                className={maxShots <= 0 ? 'invalid' : ''}
+                required
+              />
+            </div>
 
-        <div className="form-row">
-          <label htmlFor="totalShots">Total Shots:</label>
-          <input
-            id="totalShots"
-            type="number"
-            value={totalShots}
-            onChange={(e) => setTotalShots(e.target.value)}
-            className={totalShots <= 0 ? 'invalid' : ''}
-            required
-          />
-        </div>
-      </form>
+            <div className="form-row">
+              <label htmlFor="totalShots">Total Shots:</label>
+              <input
+                id="totalShots"
+                type="number"
+                value={totalShots}
+                onChange={(e) => setTotalShots(e.target.value)}
+                className={totalShots <= 0 ? 'invalid' : ''}
+                required
+              />
+            </div>
+          </form>
 
-      <div className="shooters-section">
-        <h2>Shooters</h2>
-        <div className={`input-row ${isShooterInputInvalid ? 'invalid' : ''}`}>
-          <input
-            type="text"
-            value={newShooter}
-            onChange={(e) => setNewShooter(e.target.value)}
-            placeholder="Add new shooter"
-            className={isShooterInputInvalid ? 'invalid' : ''}
-          />
+          <div className="shooters-section">
+            <h2>Shooters</h2>
+            <div className={`input-row ${isShooterInputInvalid ? 'invalid' : ''}`}>
+              <input
+                type="text"
+                value={newShooter}
+                onChange={(e) => setNewShooter(e.target.value)}
+                placeholder="Add new shooter"
+                className={isShooterInputInvalid ? 'invalid' : ''}
+              />
+              <button
+                type="button"
+                onClick={handleAddShooter}
+                className={isShooterInputInvalid ? 'invalid' : ''}
+              >
+                Add Shooter
+              </button>
+            </div>
+            <ul>
+              {shooters.map((shooter, idx) => (
+                <li key={idx}>
+                  {shooter.name}
+                  <button type="button" onClick={() => handleRemoveShooter(shooter.name)}>Remove</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="buttons-container">
+            <button
+              className={`start-shooting-button ${validateForm() ? 'enabled' : 'disabled'}`}
+              onClick={handleStartShooting}
+              disabled={!validateForm()}
+            >
+              Start Shooting
+            </button>
+            <button className="back-button" onClick={() => navigate('/')}>
+              Back to Game List
+            </button>
+          </div>
+
+          {!validateForm() && (
+            <div className="error-messages">
+              <ul>
+                {numStations <= 0 && <li>Number of Stations must be greater than zero.</li>}
+                {minShots <= 0 && <li>Min Shots per Station must be greater than zero.</li>}
+                {maxShots <= 0 && <li>Max Shots per Station must be greater than zero.</li>}
+                {totalShots <= 0 && <li>Total Shots must be greater than zero.</li>}
+                {!shooters.length && <li>At least one shooter must be added.</li>}
+              </ul>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="station-naming">
+          <h2>Name Your Stations</h2>
+          {stationNames.map((name, index) => (
+            <div key={index} className="form-row">
+              <label htmlFor={`station-${index}`}>Station {index + 1}:</label>
+              <input
+                id={`station-${index}`}
+                type="text"
+                value={name}
+                onChange={(e) => handleStationNameChange(index, e.target.value)}
+                placeholder={`Name for Station ${index + 1}`}
+                required
+              />
+            </div>
+          ))}
           <button
             type="button"
-            onClick={handleAddShooter}
-            className={isShooterInputInvalid ? 'invalid' : ''}
+            onClick={handleConfirmStationNames}
+            className="confirm-button"
           >
-            Add Shooter
+            Confirm Station Names
           </button>
-        </div>
-        <ul>
-          {shooters.map((shooter, idx) => (
-            <li key={idx}>
-              {shooter.name}
-              <button type="button" onClick={() => handleRemoveShooter(shooter.name)}>Remove</button>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="buttons-container">
-        <button
-          className={`start-shooting-button ${validateForm() ? 'enabled' : 'disabled'}`}
-          onClick={handleStartShooting}
-          disabled={!validateForm()}
-        >
-          Start Shooting
-        </button>
-        <button className="back-button" onClick={() => navigate('/')}>
-          Back to Game List
-        </button>
-      </div>
-
-      {!validateForm() && (
-        <div className="error-messages">
-          <ul>
-            {numStations <= 0 && <li>Number of Stations must be greater than zero.</li>}
-            {minShots <= 0 && <li>Min Shots per Station must be greater than zero.</li>}
-            {maxShots <= 0 && <li>Max Shots per Station must be greater than zero.</li>}
-            {totalShots <= 0 && <li>Total Shots must be greater than zero.</li>}
-            {!shooters.length && <li>At least one shooter must be added.</li>}
-          </ul>
         </div>
       )}
     </div>
