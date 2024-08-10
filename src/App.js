@@ -10,7 +10,7 @@ import './App.css';
 
 const App = () => {
   const [games, setGames] = useState([
-    { name: "Steak and Clays", date: "2024-08-01", location: "TBSC", numStations: 7, minShots: 4, maxShots: 8, totalShots: 50, shooters: [] },
+    { name: "Steak and Clays", date: "2024-08-01", location: "TBSC", numStations: 9, minShots: 4, maxShots: 8, totalShots: 50, shooters: [] },
     { name: "Game 2", date: "2024-08-02", location: "Location 2", numStations: null, minShots: null, maxShots: null, totalShots: null, shooters: [] },
   ]);
 

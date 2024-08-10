@@ -10,6 +10,9 @@ const RecordShots = () => {
   const shooter = location.state?.shooter || { name: '', shots: [] };
   const initialStation = location.state?.currentStation || 1;
 
+  // Define the initial shots for each station
+  const initialShots = [4, 6, 4, 6, 4, 6, 4, 8, 8]; // Example values
+
   // Set up local state for shots and new shot
   const [shots, setShots] = useState(shooter.shots || []);
   const [newShot, setNewShot] = useState({ station: initialStation, hit: null });
@@ -19,11 +22,20 @@ const RecordShots = () => {
     setShots(shooter.shots || []);
   }, [shooter.shots]);
 
+  // Create a grid of shots by station
+  const maxStations = initialShots.length;
+  const shotsByStation = Array.from({ length: maxStations }, (_, station) => 
+    shots.filter(shot => shot.station === station + 1)
+  );
+
   // Handler to record a shot (hit or miss)
   const handleRecordShot = (hit) => {
-    if (newShot.station >= 1) {
-      setShots([...shots, { ...newShot, hit }]);
-      setNewShot({ station: newShot.station, hit: null }); // Keep station the same
+    if (newShot.station >= 1 && newShot.station <= maxStations) {
+      const stationShots = shots.filter(shot => shot.station === newShot.station);
+      if (stationShots.length < initialShots[newShot.station - 1]) {
+        setShots([...shots, { ...newShot, hit }]);
+        setNewShot({ station: newShot.station, hit: null }); // Keep station the same
+      }
     }
   };
 
@@ -49,12 +61,6 @@ const RecordShots = () => {
     const updatedGame = { ...game, shooters: updatedShooters };
     navigate('/scoreboard', { state: { game: updatedGame } });
   };
-
-  // Create a grid of shots by station, excluding station 0
-  const maxStations = Math.max(...shots.map(shot => shot.station), 1); // Ensure we start at 1
-  const shotsByStation = Array.from({ length: maxStations }, (_, station) => // Exclude station 0
-    shots.filter(shot => shot.station === station + 1) // +1 to match 1-based index
-  );
 
   return (
     <div>
@@ -132,7 +138,7 @@ const RecordShots = () => {
         {shotsByStation.map((stationShots, stationIndex) => (
           <div key={stationIndex} style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(${stationShots.length || 1}, 40px)`,
+            gridTemplateColumns: `repeat(${initialShots[stationIndex] || 1}, 40px)`,
             gap: '5px'
           }}>
             {stationShots.length === 0
