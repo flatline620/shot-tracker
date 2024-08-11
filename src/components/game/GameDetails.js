@@ -130,6 +130,9 @@ const GameDetails = ({ games, onUpdateGame }) => {
     };
 
     const handleConfirmStationNames = () => {
+        // Replace empty names with default "Station X"
+        const updatedStationNames = stationNames.map((name, idx) => name.trim() ? name : `Station ${idx + 1}`);
+
         const updatedGame = {
             ...game,
             numStations: parseInt(numStations, 10),
@@ -137,7 +140,7 @@ const GameDetails = ({ games, onUpdateGame }) => {
             maxShots: parseInt(maxShots, 10),
             totalShots: parseInt(totalShots, 10),
             shooters,
-            stationNames
+            stationNames: updatedStationNames
         };
         onUpdateGame(index, updatedGame);
         navigate('/scoreboard', { state: { game: updatedGame } });
