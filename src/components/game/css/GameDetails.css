@@ -102,3 +102,46 @@
 .confirm-button:hover {
   background-color: #45a049; /* Darker green */
 }
+
+/* Container for the True Pairs section */
+.true-pairs-container {
+  display: flex;
+  align-items: flex-start; /* Align items at the start (top) */
+  gap: 15px; /* Space between label and radio group */
+  margin-top: 10px; /* Space above the True Pairs section */
+}
+
+/* Style for the label */
+.true-pairs-label {
+  margin: 0; /* Remove default margin */
+  line-height: 1.5; /* Adjust line height for vertical alignment */
+  flex-shrink: 0; /* Prevent label from shrinking */
+  width: 150px; /* Ensure label has enough width for alignment */
+  /* Adjust positioning to align with the form inputs */
+  padding-left: 0px; /* Adjust this value to move the radio buttons to the right */
+}
+
+/* Container for the radio options */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Individual radio option items */
+.radio-item {
+  display: flex;
+  align-items: center; /* Align radio button and label vertically */
+  margin-bottom: 5px; /* Space between radio items */
+  /* Adjust margin to align with the form inputs */
+  padding-left: 105px; /* Align with the padding-left of .true-pairs-label */
+}
+
+/* Style for the radio button */
+.radio-item input[type="radio"] {
+  margin-right: 10px; /* Space between radio button and label */
+}
+
+/* Style for the radio label */
+.radio-item label {
+  margin: 0; /* Remove default margin */
+}
