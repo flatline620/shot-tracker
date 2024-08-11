@@ -12,7 +12,7 @@ const RecordShots = () => {
   const initialStation = location.state?.currentStation || 1;
 
   // Define the initial shots for each station
-  const initialShots = [4, 6, 4, 6, 4, 6, 4, 8, 8]; // Example values
+  const initialShots = game.shotsDistribution; // Example values
 
   // Set up local state for shots, new shot, selected station, and current station
   const [shots, setShots] = useState(shooter.shots || []);

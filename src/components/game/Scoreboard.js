@@ -6,6 +6,8 @@ const Scoreboard = () => {
   const navigate = useNavigate();
   const game = location.state?.game;
 
+  console.log(game);
+
   if (!game || !game.shooters) {
     return <div>No game data found.</div>;
   }
