@@ -11,8 +11,9 @@ const RecordShots = () => {
   const shooter = location.state?.shooter || { name: '', shots: [] };
   const initialStation = location.state?.currentStation || 1;
 
-  // Define the initial shots for each station
-  const initialShots = game.shotsDistribution; // Example values
+  // Define the initial shots for each station and True Pairs matrix
+  const initialShots = game.shotsDistribution || [];
+  const truePairsMatrix = game.truePairsMatrix || [];
 
   // Set up local state for shots, new shot, selected station, and current station
   const [shots, setShots] = useState(shooter.shots || []);
@@ -172,12 +173,13 @@ const RecordShots = () => {
             >
               {Array.from({ length: initialShots[stationIndex] }).map((_, shotIndex) => {
                 const shot = stationShots.find(s => s.shotIndex === shotIndex);
+                const isTruePair = truePairsMatrix[stationIndex][shotIndex] || false;
                 return (
                   <button
                     key={shotIndex}
-                    className={`shot ${shot ? (shot.hit ? 'hit' : 'miss') : 'empty'}`}
+                    className={`shot ${shot ? (shot.hit ? 'hit' : 'miss') : isTruePair ? 'true-pair' : 'empty'}`}
                   >
-                    {shot ? (shot.hit ? '/' : 'O') : '-'}
+                    {shot ? (shot.hit ? '/' : 'O') : isTruePair ? 'TP' : '-'}
                   </button>
                 );
               })}

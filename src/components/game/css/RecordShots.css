@@ -109,3 +109,16 @@
 .return-button:hover {
   background-color: #0056b3; /* Darker shade for hover effect */
 }
+
+/* Add this to RecordShots.css */
+/* Style for True Pair shots */
+.shot.true-pair {
+  background-color: lightgrey; /* Background color for True Pair */
+  color: #6d6d6d; /* Slightly darker grey for the font */
+  font-weight: bold; /* Optional: Make the text bold */
+}
+
+.shot.true-pair:hover {
+  background-color: grey; /* Darker color on hover */
+  color: #4d4d4d; /* Even darker grey for hover state */
+}
