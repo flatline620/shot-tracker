@@ -1,36 +1,32 @@
-/* Scoreboard.css */
+/* src/components/css/Scoreboard.css */
 
 .scoreboard {
     margin: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
   }
   
   table {
     width: 100%;
-    border-collapse: collapse; /* Ensures borders are merged */
+    border-collapse: collapse;
+  }
+  
+  table, th, td {
+    border: 1px solid #ddd;
   }
   
   th, td {
-    border: 1px solid #ddd; /* Add border to cells */
-    padding: 8px; /* Add padding */
-    text-align: center; /* Center align text */
+    padding: 8px;
+    text-align: left;
   }
   
   th {
-    background-color: #f2f2f2; /* Light grey background for header */
+    background-color: #f4f4f4;
   }
   
   button {
-    padding: 6px 12px;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #ddd; /* Light grey background on hover */
-  }
-  
-  h1 {
-    text-align: center;
-    margin-bottom: 20px;
+    margin-top: 10px;
   }
   
