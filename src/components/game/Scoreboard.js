@@ -30,6 +30,8 @@ const Scoreboard = () => {
             <th>Shots Taken</th>
             <th>Num Hits</th>
             <th>Max Score Possible</th>
+            <th>Current Streak</th> {/* New Column */}
+            <th>Longest Streak</th>  {/* New Column */}
             <th>Actions</th>
           </tr>
         </thead>
@@ -40,6 +42,8 @@ const Scoreboard = () => {
               <td>{shooter.shotsTaken || 0}</td>
               <td>{shooter.numHits || 0}</td>
               <td>{shooter.maxScore || 0}</td>
+              <td>{shooter.currentStreak || 0}</td> {/* Display Current Streak */}
+              <td>{shooter.maxStreak || 0}</td> {/* Display Longest Streak */}
               <td>
                 <button onClick={() => handleRecordShots(shooter)}>Record Shots</button>
               </td>

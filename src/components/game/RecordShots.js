@@ -8,45 +8,21 @@ const RecordShots = () => {
 
   // Extract game, shooter, and currentStation from location state
   const game = location.state?.game || { shooters: [] };
-  const shooter = location.state?.shooter || { name: '', shots: [] };
+  const shooter = location.state?.shooter || { name: '', shots: [], currentStreak: 0, maxStreak: 0 };
   const initialStation = location.state?.currentStation || 1;
 
   // Define the initial shots for each station and True Pairs matrix
   const initialShots = game.shotsDistribution || [];
   const truePairsMatrix = game.truePairsMatrix || [];
 
-  // Set up local state for shots, new shot, selected station, current station, and streak tracking
+  // Set up local state for shots, new shot, selected station, and current station
   const [shots, setShots] = useState(shooter.shots || []);
   const [newShot, setNewShot] = useState({ station: initialStation, hit: null });
   const [selectedStation, setSelectedStation] = useState(initialStation);
   const [currentStation, setCurrentStation] = useState(initialStation);
-  const [currentStreak, setCurrentStreak] = useState(0);
-  const [maxStreak, setMaxStreak] = useState(0);
 
   // Use station names from the game object
   const stationNames = game.stationNames || Array.from({ length: initialShots.length }, (_, i) => `Station ${i + 1}`);
-
-  // Function to recalculate the largest hit streak
-  const recalculateStreak = useCallback(() => {
-    let currentStreak = 0;
-    let maxStreak = 0;
-
-    shots.forEach(shot => {
-      if (shot.station === currentStation) {
-        if (shot.hit) {
-          currentStreak++;
-          if (currentStreak > maxStreak) {
-            maxStreak = currentStreak;
-          }
-        } else {
-          currentStreak = 0;
-        }
-      }
-    });
-
-    setCurrentStreak(currentStreak);
-    setMaxStreak(prevMaxStreak => Math.max(prevMaxStreak, maxStreak));
-  }, [shots, currentStation]);
 
   useEffect(() => {
     setShots(shooter.shots || []);
@@ -55,8 +31,7 @@ const RecordShots = () => {
 
   useEffect(() => {
     setNewShot(prev => ({ ...prev, station: currentStation }));
-    recalculateStreak(); // Recalculate the streak whenever shots or currentStation change
-  }, [currentStation, shots, recalculateStreak]);
+  }, [currentStation]);
 
   const maxStations = initialShots.length;
   const shotsByStation = Array.from({ length: maxStations }, (_, station) =>
@@ -67,12 +42,49 @@ const RecordShots = () => {
     return shots.filter(s => s.station === currentStation);
   };
 
+  // Function to recalculate streak
+  const recalculateStreak = useCallback(() => {
+    let currentStreak = 0;
+    let maxStreak = shooter.maxStreak || 0;
+
+    for (const shot of shots) {
+      if (shot.station === currentStation) {
+        if (shot.hit) {
+          currentStreak += 1;
+        } else {
+          currentStreak = 0;
+        }
+      } else {
+        if (shot.hit) {
+          currentStreak += 1;
+        } else {
+          currentStreak = 0;
+        }
+      }
+
+      if (currentStreak > maxStreak) {
+        maxStreak = currentStreak;
+      }
+    }
+
+    return { currentStreak, maxStreak };
+  }, [shots, currentStation, shooter.maxStreak]);
+
+  useEffect(() => {
+    const { currentStreak, maxStreak } = recalculateStreak();
+    setNewShot(prev => ({ ...prev, currentStreak, maxStreak }));
+  }, [recalculateStreak]);
+
   const handleRecordShot = (hit) => {
     if (currentStation >= 1 && currentStation <= maxStations) {
       const stationShots = calculateCurrentStationShots();
       if (stationShots.length < initialShots[currentStation - 1]) {
         const newShotIndex = stationShots.length;
-        setShots(prevShots => [...prevShots, { ...newShot, hit, shotIndex: newShotIndex }]);
+        const { currentStreak, maxStreak } = recalculateStreak();
+        setShots(prevShots => [
+          ...prevShots,
+          { ...newShot, hit, shotIndex: newShotIndex, currentStreak, maxStreak }
+        ]);
         setNewShot(prev => ({ ...prev, hit: null })); // Keep station the same
       }
     }
@@ -96,6 +108,8 @@ const RecordShots = () => {
     const totalShotsAtCurrentStation = initialShots[currentStation - 1];
     const remainingShots = totalShotsAtCurrentStation - currentShots.length;
 
+    const { currentStreak, maxStreak } = recalculateStreak();
+
     const updatedShooters = game.shooters.map((s) =>
       s.name === shooter.name
         ? {
@@ -103,7 +117,9 @@ const RecordShots = () => {
             shotsTaken: shots.length,
             numHits: shots.filter(s => s.hit).length,
             shots,
-            currentStation: remainingShots > 0 ? s.currentStation : findNextIncompleteStation()
+            currentStation: remainingShots > 0 ? s.currentStation : findNextIncompleteStation(),
+            currentStreak,
+            maxStreak
           }
         : s
     );
@@ -212,8 +228,6 @@ const RecordShots = () => {
           </div>
         ))}
       </div>
-      <h2>Current Streak: {currentStreak}</h2>
-      <h2>Longest Streak: {maxStreak}</h2>
       <div className="button-container">
         <button className="record-button" onClick={handleRecordShots}>
           Record Shots
