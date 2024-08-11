@@ -15,11 +15,13 @@ const RecordShots = () => {
   const initialShots = game.shotsDistribution || [];
   const truePairsMatrix = game.truePairsMatrix || [];
 
-  // Set up local state for shots, new shot, selected station, and current station
+  // Set up local state for shots, new shot, selected station, current station, and streak tracking
   const [shots, setShots] = useState(shooter.shots || []);
   const [newShot, setNewShot] = useState({ station: initialStation, hit: null });
   const [selectedStation, setSelectedStation] = useState(initialStation);
   const [currentStation, setCurrentStation] = useState(initialStation);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [maxStreak, setMaxStreak] = useState(0);
 
   // Use station names from the game object
   const stationNames = game.stationNames || Array.from({ length: initialShots.length }, (_, i) => `Station ${i + 1}`);
@@ -31,7 +33,8 @@ const RecordShots = () => {
 
   useEffect(() => {
     setNewShot(prev => ({ ...prev, station: currentStation }));
-  }, [currentStation]);
+    recalculateStreak();
+  }, [currentStation, shots]);
 
   const maxStations = initialShots.length;
   const shotsByStation = Array.from({ length: maxStations }, (_, station) =>
@@ -117,6 +120,26 @@ const RecordShots = () => {
     navigate('/scoreboard', { state: { game } }); // Navigate to scoreboard without saving changes
   };
 
+  // Function to recalculate the largest hit streak
+  const recalculateStreak = () => {
+    let currentStreak = 0;
+    let maxStreak = 0;
+
+    shots.forEach(shot => {
+      if (shot.hit) {
+        currentStreak++;
+        if (currentStreak > maxStreak) {
+          maxStreak = currentStreak;
+        }
+      } else {
+        currentStreak = 0;
+      }
+    });
+
+    setCurrentStreak(currentStreak);
+    setMaxStreak(maxStreak);
+  };
+
   return (
     <div className="record-shots">
       <h1>Record Shots for {shooter.name}</h1>
@@ -187,6 +210,8 @@ const RecordShots = () => {
           </div>
         ))}
       </div>
+      <h2>Current Streak: {currentStreak}</h2>
+      <h2>Longest Streak: {maxStreak}</h2>
       <div className="button-container">
         <button className="record-button" onClick={handleRecordShots}>
           Record Shots
