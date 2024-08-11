@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './css/RecordShots.css'; // Corrected import path
 
@@ -26,6 +26,28 @@ const RecordShots = () => {
   // Use station names from the game object
   const stationNames = game.stationNames || Array.from({ length: initialShots.length }, (_, i) => `Station ${i + 1}`);
 
+  // Function to recalculate the largest hit streak
+  const recalculateStreak = useCallback(() => {
+    let currentStreak = 0;
+    let maxStreak = 0;
+
+    shots.forEach(shot => {
+      if (shot.station === currentStation) {
+        if (shot.hit) {
+          currentStreak++;
+          if (currentStreak > maxStreak) {
+            maxStreak = currentStreak;
+          }
+        } else {
+          currentStreak = 0;
+        }
+      }
+    });
+
+    setCurrentStreak(currentStreak);
+    setMaxStreak(prevMaxStreak => Math.max(prevMaxStreak, maxStreak));
+  }, [shots, currentStation]);
+
   useEffect(() => {
     setShots(shooter.shots || []);
     setCurrentStation(shooter.currentStation || initialStation);
@@ -33,8 +55,8 @@ const RecordShots = () => {
 
   useEffect(() => {
     setNewShot(prev => ({ ...prev, station: currentStation }));
-    recalculateStreak();
-  }, [currentStation, shots]);
+    recalculateStreak(); // Recalculate the streak whenever shots or currentStation change
+  }, [currentStation, shots, recalculateStreak]);
 
   const maxStations = initialShots.length;
   const shotsByStation = Array.from({ length: maxStations }, (_, station) =>
@@ -118,26 +140,6 @@ const RecordShots = () => {
 
   const handleCancelShooter = () => {
     navigate('/scoreboard', { state: { game } }); // Navigate to scoreboard without saving changes
-  };
-
-  // Function to recalculate the largest hit streak
-  const recalculateStreak = () => {
-    let currentStreak = 0;
-    let maxStreak = 0;
-
-    shots.forEach(shot => {
-      if (shot.hit) {
-        currentStreak++;
-        if (currentStreak > maxStreak) {
-          maxStreak = currentStreak;
-        }
-      } else {
-        currentStreak = 0;
-      }
-    });
-
-    setCurrentStreak(currentStreak);
-    setMaxStreak(maxStreak);
   };
 
   return (
