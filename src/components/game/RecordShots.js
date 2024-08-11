@@ -162,20 +162,26 @@ const RecordShots = () => {
         </button>
       </div>
       <h2>Recorded Shots</h2>
-      <div className="shots-grid">
+      <div className="shots-container">
         {shotsByStation.map((stationShots, stationIndex) => (
-          <div key={stationIndex} className="station-grid" style={{ gridTemplateColumns: `repeat(${initialShots[stationIndex]}, 40px)` }}>
-            {Array.from({ length: initialShots[stationIndex] }).map((_, shotIndex) => {
-              const shot = stationShots.find(s => s.shotIndex === shotIndex);
-              return (
-                <button
-                  key={shotIndex}
-                  className={`shot ${shot ? (shot.hit ? 'hit' : 'miss') : 'empty'}`}
-                >
-                  {shot ? (shot.hit ? '/' : 'O') : '-'}
-                </button>
-              );
-            })}
+          <div key={stationIndex} className="station-row">
+            <div className="station-name">{stationNames[stationIndex]}</div>
+            <div
+              className="station-grid"
+              style={{ gridTemplateColumns: `repeat(${initialShots[stationIndex]}, 40px)` }}
+            >
+              {Array.from({ length: initialShots[stationIndex] }).map((_, shotIndex) => {
+                const shot = stationShots.find(s => s.shotIndex === shotIndex);
+                return (
+                  <button
+                    key={shotIndex}
+                    className={`shot ${shot ? (shot.hit ? 'hit' : 'miss') : 'empty'}`}
+                  >
+                    {shot ? (shot.hit ? '/' : 'O') : '-'}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         ))}
       </div>
