@@ -7,10 +7,6 @@ const NewGameForm = ({ onAddGame }) => {
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
-  const [numStations, setNumStations] = useState('');
-  const [minShots, setMinShots] = useState('');
-  const [maxShots, setMaxShots] = useState('');
-  const [totalShots, setTotalShots] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,10 +14,6 @@ const NewGameForm = ({ onAddGame }) => {
       name,
       date,
       location,
-      numStations: parseInt(numStations, 10),
-      minShots: parseInt(minShots, 10),
-      maxShots: parseInt(maxShots, 10),
-      totalShots: parseInt(totalShots, 10),
     };
     const newIndex = onAddGame(newGame);
     navigate(`/game/${newIndex}`);
@@ -55,42 +47,6 @@ const NewGameForm = ({ onAddGame }) => {
             type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Number of Stations:
-          <input
-            type="number"
-            value={numStations}
-            onChange={(e) => setNumStations(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Min Shots per Station:
-          <input
-            type="number"
-            value={minShots}
-            onChange={(e) => setMinShots(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Max Shots per Station:
-          <input
-            type="number"
-            value={maxShots}
-            onChange={(e) => setMaxShots(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Total Shots:
-          <input
-            type="number"
-            value={totalShots}
-            onChange={(e) => setTotalShots(e.target.value)}
             required
           />
         </label>

@@ -117,7 +117,9 @@ const GameDetails = ({ games, onUpdateGame }) => {
                 truePairsMatrix // Add the True Pairs matrix to the game state
             };
             onUpdateGame(index, updatedGame);
-            navigate('/scoreboard', { state: { game: updatedGame } });
+            setIsNamingStations(true); // Show the station naming input fields
+
+            //navigate('/scoreboard', { state: { game: updatedGame } });
         }
     };
 
