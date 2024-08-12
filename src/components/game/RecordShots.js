@@ -107,9 +107,9 @@ const RecordShots = () => {
     const currentShots = calculateCurrentStationShots();
     const totalShotsAtCurrentStation = initialShots[currentStation - 1];
     const remainingShots = totalShotsAtCurrentStation - currentShots.length;
-
+  
     const { currentStreak, maxStreak } = recalculateStreak();
-
+  
     const updatedShooters = game.shooters.map((s) =>
       s.name === shooter.name
         ? {
@@ -123,7 +123,7 @@ const RecordShots = () => {
           }
         : s
     );
-
+  
     const updatedGame = { ...game, shooters: updatedShooters };
     navigate('/scoreboard', { state: { game: updatedGame } });
   };

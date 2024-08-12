@@ -1,9 +1,7 @@
-// src/components/Scoreboard.js
-
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import GenericScorecard from './GenericScorecard'; // Import the new component
-import './css/Scoreboard.css'; // Ensure this is correct
+import GenericScorecard from './GenericScorecard';
+import './css/Scoreboard.css';
 
 const Scoreboard = () => {
   const location = useLocation();
@@ -21,6 +19,14 @@ const Scoreboard = () => {
     navigate('/record-shots', { state: { game, shooter, currentStation } });
   };
 
+  // Helper function to calculate the number of stations a shooter has shot at
+  const getStationsShotAt = (shooter) => {
+    // Ensure shooter.shots is an array
+    const shots = shooter.shots || [];
+    const uniqueStations = new Set(shots.map(shot => shot.station));
+    return uniqueStations.size;
+  };
+
   return (
     <div className="scoreboard">
       <h1>Scoreboard</h1>
@@ -29,6 +35,7 @@ const Scoreboard = () => {
         <thead>
           <tr>
             <th>Shooter</th>
+            <th>Stations Shot</th> {/* Moved to second position */}
             <th>Shots Taken</th>
             <th>Num Hits</th>
             <th>Shots Remaining</th>
@@ -54,6 +61,7 @@ const Scoreboard = () => {
             return (
               <tr key={index}>
                 <td>{shooter.name}</td>
+                <td>{getStationsShotAt(shooter)}</td> {/* Stations Shot at */}
                 <td>{totalShots}</td>
                 <td>{numHits}</td>
                 <td>{shotsRemaining}</td>
@@ -69,11 +77,10 @@ const Scoreboard = () => {
         </tbody>
       </table>
 
-      {/* Add the Generic Scorecard at the bottom */}
       <GenericScorecard 
         shotsDistribution={shotsDistribution} 
         stationNames={stationNames}
-        truePairsMatrix={truePairsMatrix} // Pass the True Pairs Matrix
+        truePairsMatrix={truePairsMatrix} 
       />
 
       <button onClick={() => navigate('/')}>Back to Game List</button>
