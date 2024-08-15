@@ -73,6 +73,9 @@ const GameDetails = ({ games, onUpdateGame }) => {
     // State for True Pairs option
     const [truePairsOption, setTruePairsOption] = useState('None');
 
+    // State for Rotate Shooters
+    const [rotateShooters, setRotateShooters] = useState(true); // Default to true
+
     useEffect(() => {
         setNumStations(game.numStations || '');
         setMinShots(game.minShots || '');
@@ -102,9 +105,9 @@ const GameDetails = ({ games, onUpdateGame }) => {
                 parseInt(maxShots, 10),
                 parseInt(totalShots, 10)
             );
-
+    
             const truePairsMatrix = generateTruePairsMatrix(shotsDistribution, truePairsOption);
-
+    
             const updatedGame = {
                 ...game,
                 numStations: parseInt(numStations, 10),
@@ -113,16 +116,15 @@ const GameDetails = ({ games, onUpdateGame }) => {
                 totalShots: parseInt(totalShots, 10),
                 shooters,
                 stationNames,
-                shotsDistribution, // Add the shot distribution to the game state
-                truePairsMatrix // Add the True Pairs matrix to the game state
+                shotsDistribution,
+                truePairsMatrix,
+                rotateShooters // Add this line
             };
             onUpdateGame(index, updatedGame);
-            setIsNamingStations(true); // Show the station naming input fields
-
-            //navigate('/scoreboard', { state: { game: updatedGame } });
+            setIsNamingStations(true);
         }
     };
-
+    
     const handleStationNameChange = (index, name) => {
         const updatedStationNames = [...stationNames];
         updatedStationNames[index] = name;
@@ -289,6 +291,18 @@ const GameDetails = ({ games, onUpdateGame }) => {
                                 <label htmlFor="truePairsNone">None</label>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="rotate-shooters-container">
+                        <label htmlFor="rotateShooters">
+                            <input
+                                type="checkbox"
+                                id="rotateShooters"
+                                checked={rotateShooters}
+                                onChange={(e) => setRotateShooters(e.target.checked)}
+                            />
+                            Rotate Shooters
+                        </label>
                     </div>
 
                     <div className="buttons-container">

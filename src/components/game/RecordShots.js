@@ -14,6 +14,7 @@ const RecordShots = () => {
   // Define the initial shots for each station and True Pairs matrix
   const initialShots = game.shotsDistribution || [];
   const truePairsMatrix = game.truePairsMatrix || [];
+  const rotateShooters = game.rotateShooters || false; // Assuming this flag is part of game object
 
   // Set up local state for shots, new shot, selected station, and current station
   const [shots, setShots] = useState(shooter.shots || []);
@@ -125,7 +126,8 @@ const RecordShots = () => {
     );
   
     const updatedGame = { ...game, shooters: updatedShooters };
-    navigate('/scoreboard', { state: { game: updatedGame } });
+    const nextShooter = findNextShooter(updatedShooters);
+    navigate('/scoreboard', { state: { game: updatedGame, currentShooter: nextShooter } });
   };
 
   const findNextIncompleteStation = () => {
@@ -138,6 +140,39 @@ const RecordShots = () => {
       }
     }
     return null; // All stations are complete
+  };
+
+  const findNextShooter = () => {
+    console.log('Rotate Shooters:', rotateShooters);
+    if (rotateShooters) {
+      // Find index of the current shooter
+      const currentShooterIndex = game.shooters.findIndex(s => s.name === shooter.name);
+      // Determine the next shooter after the one who shot first
+      const nextShooterIndex = (currentShooterIndex + 1) % game.shooters.length;
+      return game.shooters[nextShooterIndex];
+    } else {
+      // Default logic: move to next shooter in list
+      // for (let i = 0; i < maxStations; i++) {
+      //   console.log('Validating Station:', i);
+
+      //   const station = i + 1;
+      //   const shotsAtStation = shots.filter(shot => shot.station === station).length;
+      //   if (shotsAtStation < initialShots[i]) {
+      //     console.log('Incomplete Shooter', shooter);
+      //     return shooter; // Remain as the current shooter if incomplete
+      //   }
+      // }
+
+      console.log('Moving to next shooter');
+
+      // Find next shooter
+      const currentIndex = game.shooters.indexOf(shooter);
+      const nextIndex = (currentIndex + 1) % game.shooters.length;
+
+      console.log('Next Index:', nextIndex);
+      console.log('Next Shooter:', game.shooters[nextIndex]);
+      return game.shooters[nextIndex];
+    }
   };
 
   const handleStationChange = (e) => {

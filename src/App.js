@@ -17,7 +17,7 @@ const App = () => {
     const newIndex = games.length;
     setGames((prevGames) => {
       const updatedGames = [...prevGames, newGame];
-      console.log('Games after adding:', updatedGames); // Log to check
+
       return updatedGames;
     });
     return newIndex;
@@ -33,15 +33,10 @@ const App = () => {
       const updatedGames = prevGames.map((game, i) =>
         i === parseInt(index, 10) ? updatedGame : game
       );
-      console.log('Games after update:', updatedGames);
+
       return updatedGames;
     });
   };
-
-  useEffect(() => {
-    console.log('Games state updated:', games); // Log to check
-  }, [games]);
-
 
   return (
     <Router>
