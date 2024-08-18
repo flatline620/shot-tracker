@@ -1,29 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './css/RecordShots.css'; // Corrected import path
+import './css/RecordShots.css'; 
 
 const RecordShots = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Extract game, shooter, and currentStation from location state
   const game = location.state?.game || { shooters: [] };
   const shooter = location.state?.shooter || { name: '', shots: [], currentStreak: 0, maxStreak: 0 };
-  const initialStation = location.state?.currentStation || 1;
+  const initialStation = game.currentStation || 1;
 
-  // Define the initial shots for each station and True Pairs matrix
   const initialShots = game.shotsDistribution || [];
   const truePairsMatrix = game.truePairsMatrix || [];
-  const rotateShooters = game.rotateShooters || false; // Assuming this flag is part of game object
+  const rotateShooters = game.rotateShooters || false;
 
-  // Set up local state for shots, new shot, selected station, and current station
   const [shots, setShots] = useState(shooter.shots || []);
   const [newShot, setNewShot] = useState({ station: initialStation, hit: null });
   const [selectedStation, setSelectedStation] = useState(initialStation);
   const [currentStation, setCurrentStation] = useState(initialStation);
 
-  // Use station names from the game object
   const stationNames = game.stationNames || Array.from({ length: initialShots.length }, (_, i) => `Station ${i + 1}`);
+  console.log(currentStation);
 
   useEffect(() => {
     setShots(shooter.shots || []);
@@ -43,7 +40,6 @@ const RecordShots = () => {
     return shots.filter(s => s.station === currentStation);
   };
 
-  // Function to recalculate streak
   const recalculateStreak = useCallback(() => {
     let currentStreak = 0;
     let maxStreak = shooter.maxStreak || 0;
@@ -86,48 +82,34 @@ const RecordShots = () => {
           ...prevShots,
           { ...newShot, hit, shotIndex: newShotIndex, currentStreak, maxStreak }
         ]);
-        setNewShot(prev => ({ ...prev, hit: null })); // Keep station the same
+        setNewShot(prev => ({ ...prev, hit: null }));
       }
     }
   };
 
   const handleUndoLastShot = () => {
-    // Get all shots for the current station
     const stationShots = calculateCurrentStationShots();
     
     if (stationShots.length > 0) {
-      // Get the index of the last shot for the current station
       const lastShotIndex = stationShots[stationShots.length - 1].shotIndex;
       
-      // Filter out the last shot for the current station
       setShots(prevShots => prevShots.filter(shot => !(shot.station === currentStation && shot.shotIndex === lastShotIndex)));
     }
   };
 
   const areAllShootersDoneForStation = (station, updatedShooters) => {
-    console.log(station);
     return updatedShooters.every(shooter => {
-      // Ensure shooter and shooter.shots are defined
       if (!shooter || !Array.isArray(shooter.shots)) {
         return false;
       }
-      console.log(shooter);
-      // Get the shots for the current station for the shooter
       const shotsForStation = shooter.shots.filter(shot => shot.station === station);
-      // Check if the number of shots for the station matches the expected shots
-
-      console.log(shotsForStation);
       return shotsForStation.length >= (initialShots[station - 1] || 0);
     });
   };
-  
+
   const handleRecordShots = () => {
-    const currentShots = calculateCurrentStationShots();
-    const totalShotsAtCurrentStation = initialShots[currentStation - 1];
-    const remainingShots = totalShotsAtCurrentStation - currentShots.length;
-  
     const { currentStreak, maxStreak } = recalculateStreak();
-  
+
     const updatedShooters = game.shooters.map((s) =>
       s.name === shooter.name
         ? {
@@ -135,49 +117,53 @@ const RecordShots = () => {
             shotsTaken: shots.length,
             numHits: shots.filter(s => s.hit).length,
             shots,
-            currentStation: remainingShots > 0 ? s.currentStation : findNextIncompleteStation(),
             currentStreak,
             maxStreak
           }
         : s
     );
-  
-    const updatedGame = { ...game, shooters: updatedShooters };
-  
-    // Check if all shooters are done for the current station
+
     const allShootersDone = areAllShootersDoneForStation(currentStation, updatedShooters);
-    console.log('Are all shooters done for the current station?', allShootersDone);
-  
+
+    const updatedGame = { ...game, shooters: updatedShooters, currentStation: findNextIncompleteStation(allShootersDone) };
+
     const nextShooter = findNextShooter(allShootersDone);
     navigate('/scoreboard', { state: { game: updatedGame, currentShooter: nextShooter } });
   };
+
+  const findNextIncompleteStation = (allShootersDone) => {
+    if (!allShootersDone) {
+      return currentStation;
+    }
+
+    console.log('Current Station: ', currentStation);
+    const startStationIndex = currentStation - 1; // Convert to zero-based index
   
-  const findNextIncompleteStation = () => {
-    // Find the next incomplete station
     for (let i = 0; i < maxStations; i++) {
-      const station = i + 1;
+      // Calculate the index to check, wrapping around to the beginning if necessary
+      const stationIndex = (startStationIndex + i) % maxStations;
+      const station = stationIndex + 1;
       const shotsAtStation = shots.filter(shot => shot.station === station).length;
-      if (shotsAtStation < initialShots[i]) {
+  
+      console.log('Shots: ', shotsAtStation);
+
+      if (shotsAtStation < initialShots[stationIndex]) {
+        console.log('Return: ', station);
         return station;
       }
     }
-    return null; // All stations are complete
+  
+    // If all stations are complete, return null
+    return null;
   };
 
   const findNextShooter = (allShootersDone) => {
-    console.log('Rotate Shooters:', rotateShooters);
-    console.log(shooter);
-
-    // Find next shooter
     const currentIndex = game.shooters.indexOf(shooter);
     let nextIndex = (currentIndex + 1) % game.shooters.length;
 
     if (allShootersDone && rotateShooters) {
       nextIndex = (nextIndex + 1) % game.shooters.length;
     }
-
-    console.log('Next Index:', nextIndex);
-    console.log('Next Shooter:', game.shooters[nextIndex]);
 
     return game.shooters[nextIndex];
   };
@@ -197,7 +183,7 @@ const RecordShots = () => {
   };
 
   const handleCancelShooter = () => {
-    navigate('/scoreboard', { state: { game } }); // Navigate to scoreboard without saving changes
+    navigate('/scoreboard', { state: { game } });
   };
 
   return (

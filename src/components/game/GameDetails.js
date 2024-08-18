@@ -227,32 +227,44 @@ const GameDetails = ({ games, onUpdateGame }) => {
 
                     <div className="shooters-section">
                         <h2>Shooters</h2>
+                        <div className="rotate-shooters-container">
+                            <label htmlFor="rotateShooters">
+                                <input
+                                    type="checkbox"
+                                    id="rotateShooters"
+                                    checked={rotateShooters}
+                                    onChange={(e) => setRotateShooters(e.target.checked)}
+                                />
+                                Rotate Shooters
+                            </label>
+                        </div>
                         <div className={`input-row ${isShooterInputInvalid ? 'invalid' : ''}`}>
                             <input
-                                type="text"
-                                value={newShooter}
-                                onChange={(e) => setNewShooter(e.target.value)}
-                                placeholder="Add new shooter"
-                                className={isShooterInputInvalid ? 'invalid' : ''}
+                            type="text"
+                            value={newShooter}
+                            onChange={(e) => setNewShooter(e.target.value)}
+                            placeholder="Add new shooter"
+                            className={isShooterInputInvalid ? 'invalid' : ''}
                             />
                             <button
-                                type="button"
-                                onClick={handleAddShooter}
-                                className={isShooterInputInvalid ? 'disabled' : ''}
-                                disabled={isShooterInputInvalid}
+                            type="button"
+                            onClick={handleAddShooter}
+                            className={isShooterInputInvalid ? 'disabled' : ''}
+                            disabled={isShooterInputInvalid}
                             >
-                                Add Shooter
+                            Add Shooter
                             </button>
                         </div>
                         <ul>
                             {shooters.map(shooter => (
-                                <li key={shooter.name}>
-                                    {shooter.name}
-                                    <button type="button" onClick={() => handleRemoveShooter(shooter.name)}>Remove</button>
-                                </li>
+                            <li key={shooter.name}>
+                                <span className="name-column">{shooter.name}</span>
+                                <button className="remove-button" type="button" onClick={() => handleRemoveShooter(shooter.name)}>Remove</button>
+                            </li>
                             ))}
                         </ul>
                     </div>
+
 
                     <div className="true-pairs-container">
                         <label className="true-pairs-label">True Pairs:</label>
@@ -291,18 +303,6 @@ const GameDetails = ({ games, onUpdateGame }) => {
                                 <label htmlFor="truePairsNone">None</label>
                             </div>
                         </div>
-                    </div>
-
-                    <div className="rotate-shooters-container">
-                        <label htmlFor="rotateShooters">
-                            <input
-                                type="checkbox"
-                                id="rotateShooters"
-                                checked={rotateShooters}
-                                onChange={(e) => setRotateShooters(e.target.checked)}
-                            />
-                            Rotate Shooters
-                        </label>
                     </div>
 
                     <div className="buttons-container">

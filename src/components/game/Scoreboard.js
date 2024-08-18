@@ -22,8 +22,7 @@ const Scoreboard = () => {
   };
 
   const handleRecordShots = (shooter) => {
-    const currentStation = shooter.currentStation || 1;
-    navigate('/record-shots', { state: { game, shooter, currentStation } });
+    navigate('/record-shots', { state: { game, shooter } });
   };
 
   return (
