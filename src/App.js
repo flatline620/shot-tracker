@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import GameGrid from './components/game/GameGrid';
 import NewGameForm from './components/game/NewGameForm';
@@ -10,7 +10,7 @@ import './App.css';
 
 const App = () => {
   const [games, setGames] = useState([
-    { name: "Steak and Clays", date: "2024-08-01", location: "TBSC", numStations: 7, minShots: 4, maxShots: 8, totalShots: 50, shooters: [{name: 'Sam', shotsTaken: 0, numHits: 0, maxScore: 0}, {name: 'Laura', shotsTaken: 0, numHits: 0, maxScore: 0}, {name: 'Rob', shotsTaken: 0, numHits: 0, maxScore: 0}] },
+    { name: "Steak and Clays", date: new Date().toISOString().split('T')[0], location: "TBSC", numStations: 7, minShots: 4, maxShots: 8, totalShots: 50, shooters: [{name: 'Sam', shotsTaken: 0, numHits: 0, maxScore: 0}, {name: 'Laura', shotsTaken: 0, numHits: 0, maxScore: 0}, {name: 'Rob', shotsTaken: 0, numHits: 0, maxScore: 0}] },
   ]);
 
   const handleAddGame = (newGame) => {

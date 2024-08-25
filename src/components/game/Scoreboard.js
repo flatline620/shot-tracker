@@ -71,7 +71,12 @@ const Scoreboard = () => {
                 <td>{shooter.currentStreak || 0}</td>
                 <td>{shooter.maxStreak || 0}</td>
                 <td>
-                  <button onClick={() => handleRecordShots(shooter)}>Record Shots</button>
+                  <button 
+                    onClick={() => handleRecordShots(shooter)} 
+                    disabled={shotsRemaining <= 0}
+                  >
+                    Record Shots
+                  </button>
                 </td>
               </tr>
             );
@@ -83,7 +88,7 @@ const Scoreboard = () => {
         stationNames={stationNames}
         truePairsMatrix={truePairsMatrix} 
       />
-      <button onClick={() => navigate('/')}>Back to Game List</button>
+      <button onClick={() => navigate('/')}>End Game</button>
     </div>
   );
 };

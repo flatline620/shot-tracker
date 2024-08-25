@@ -316,10 +316,10 @@ const GameDetails = ({ games, onUpdateGame }) => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => setIsNamingStations(true)}
+                            onClick={() => navigate('/')}
                             className="back-button"
                         >
-                            Back
+                            Back to Game List
                         </button>
                     </div>
 
