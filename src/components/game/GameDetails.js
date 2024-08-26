@@ -32,14 +32,18 @@ const distributeShots = (numStations, minShotsPerStation, maxShotsPerStation, to
 // Function to assign True Pairs as a matrix
 const generateTruePairsMatrix = (shots, truePairsOption) => {
     const truePairsMatrix = [];
+
     for (let i = 0; i < shots.length; i++) {
         const numShots = shots[i];
         const truePairs = Array(numShots).fill(false); // Default all shots to not be True Pair
 
+        // Randomly decide whether to assign True Pairs 50% of the time
+        const shouldAssignTruePairs = Math.random() < 0.5;
+
         if (truePairsOption === 'All') {
             // Set all shots as True Pairs
             truePairs.fill(true);
-        } else if (truePairsOption === 'Random') {
+        } else if (truePairsOption === 'Random' && shouldAssignTruePairs) {
             // Assign True Pairs randomly
             const numTruePairs = Math.floor(Math.random() * (Math.floor(numShots / 2) + 1)) * 2;
             for (let j = numShots - numTruePairs; j < numShots; j++) {
