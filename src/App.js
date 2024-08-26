@@ -39,7 +39,7 @@ const App = () => {
   };
 
   return (
-    <Router>
+    <Router basename="/shot-tracker">
       <Routes>
         <Route path="/" element={<GameGrid games={games} />} />
         <Route path="/new" element={<NewGameForm onAddGame={handleAddGame} />} />
