@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import StationNaming from './StationNaming';
 import './css/GameDetails.css'; // Ensure the correct path to the CSS file
 
 // Function to distribute shots
@@ -334,36 +335,12 @@ const GameDetails = ({ games, onUpdateGame }) => {
                     </div>
                 </>
             ) : (
-                <div className="station-naming">
-                    <h2>Station Names</h2>
-                    {stationNames.map((name, idx) => (
-                        <div className="form-row" key={idx}>
-                            <label htmlFor={`stationName${idx}`}>Station {idx + 1}:</label>
-                            <input
-                                type="text"
-                                id={`stationName${idx}`}
-                                value={name}
-                                onChange={(e) => handleStationNameChange(idx, e.target.value)}
-                            />
-                        </div>
-                    ))}
-                    <div className="buttons-container">
-                        <button
-                            type="button"
-                            onClick={handleConfirmStationNames}
-                            className="confirm-button"
-                        >
-                            Confirm
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setIsNamingStations(false)}
-                            className="back-button"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </div>
+                <StationNaming
+                    stationNames={stationNames}
+                    onStationNameChange={handleStationNameChange}
+                    onConfirm={handleConfirmStationNames}
+                    onCancel={() => setIsNamingStations(false)}
+                />
             )}
         </div>
     );
