@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import GenericScorecard from './GenericScorecard';
+import StationNaming from './StationNaming'; // Import StationNaming
 import './css/Scoreboard.css';
 
 const Scoreboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isRenamingStations, setIsRenamingStations] = useState(false);
+  const [localStationNames, setLocalStationNames] = useState(location.state?.game?.stationNames || []);
   const game = location.state?.game || { shooters: [] };
   const currentShooter = location.state?.currentShooter || (game.shooters.length > 0 ? game.shooters[0] : null);
 
@@ -100,78 +103,108 @@ const Scoreboard = () => {
     });
   };
 
+  const handleStationNameChange = (index, newName) => {
+    const updatedStationNames = [...localStationNames];
+    updatedStationNames[index] = newName;
+    setLocalStationNames(updatedStationNames);
+  };
+
+  const handleConfirmStationNames = () => {
+    // Update the station names in the game object or backend
+    game.stationNames = localStationNames;
+    setIsRenamingStations(false);
+  };
+
+  const handleCancelStationNaming = () => {
+    setIsRenamingStations(false);
+  };
+
   return (
     <div className="scoreboard">
-      <h1>Scoreboard</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Shooter</th>
-            <th>Stations Shot</th>
-            <th>Shots Taken</th>
-            <th>Num Hits</th>
-            <th>Shots Remaining</th>
-            <th>Max Score Possible</th>
-            <th>Current Streak</th>
-            <th>Longest Streak</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {shooters.map((shooter, index) => {
-            const totalShots = shooter.shotsTaken || 0;
-            const numHits = shooter.numHits || 0;
-
-            const shotsTakenByStation = shooter.shots || [];
-            const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
-              const shotsAtCurrentStation = shotsTakenByStation.filter(shot => shot.station === stationIndex + 1).length;
-              return acc + Math.max(shotsAtStation - shotsAtCurrentStation, 0);
-            }, 0);
-
-            const maxScorePossible = numHits + shotsRemaining;
-
-            const isCurrentShooter = shooter === currentShooter;
-
-            return (
-              <tr 
-                key={index} 
-                style={{ backgroundColor: isCurrentShooter ? 'lightgreen' : 'white' }}
-              >
-                <td style={{ fontStyle: isCurrentShooter ? 'italic' : 'normal' }}>{shooter.name}</td>
-                <td>{getStationsShotAt(shooter)}</td>
-                <td>{totalShots}</td>
-                <td>{numHits}</td>
-                <td>{shotsRemaining}</td>
-                <td>{maxScorePossible}</td>
-                <td>{shooter.currentStreak || 0}</td>
-                <td>{shooter.maxStreak || 0}</td>
-                <td>
-                  <button 
-                    onClick={() => handleRecordShots(shooter)} 
-                    disabled={shotsRemaining <= 0}
-                  >
-                    Record Shots
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
-      {allShootersFinished ? (
-        <div>
-          <button onClick={copyResults}>Copy Results</button>
-        </div>
-      ) : (
-        <GenericScorecard 
-          shotsDistribution={shotsDistribution} 
-          stationNames={stationNames}
-          truePairsMatrix={truePairsMatrix} 
+      {isRenamingStations ? (
+        <StationNaming
+          stationNames={localStationNames}
+          onStationNameChange={handleStationNameChange}
+          onConfirm={handleConfirmStationNames}
+          onCancel={handleCancelStationNaming}
         />
-      )}
+      ) : (
+        <>
+          <h1>Scoreboard</h1>
+          <table>
+            <thead>
+              <tr>
+                <th>Shooter</th>
+                <th>Stations Shot</th>
+                <th>Shots Taken</th>
+                <th>Num Hits</th>
+                <th>Shots Remaining</th>
+                <th>Max Score Possible</th>
+                <th>Current Streak</th>
+                <th>Longest Streak</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shooters.map((shooter, index) => {
+                const totalShots = shooter.shotsTaken || 0;
+                const numHits = shooter.numHits || 0;
 
-      <button onClick={() => navigate('/')}>End Game</button>
+                const shotsTakenByStation = shooter.shots || [];
+                const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
+                  const shotsAtCurrentStation = shotsTakenByStation.filter(shot => shot.station === stationIndex + 1).length;
+                  return acc + Math.max(shotsAtStation - shotsAtCurrentStation, 0);
+                }, 0);
+
+                const maxScorePossible = numHits + shotsRemaining;
+
+                const isCurrentShooter = shooter === currentShooter;
+
+                return (
+                  <tr 
+                    key={index} 
+                    style={{ backgroundColor: isCurrentShooter ? 'lightgreen' : 'white' }}
+                  >
+                    <td style={{ fontStyle: isCurrentShooter ? 'italic' : 'normal' }}>{shooter.name}</td>
+                    <td>{getStationsShotAt(shooter)}</td>
+                    <td>{totalShots}</td>
+                    <td>{numHits}</td>
+                    <td>{shotsRemaining}</td>
+                    <td>{maxScorePossible}</td>
+                    <td>{shooter.currentStreak || 0}</td>
+                    <td>{shooter.maxStreak || 0}</td>
+                    <td>
+                      <button 
+                        onClick={() => handleRecordShots(shooter)} 
+                        disabled={shotsRemaining <= 0}
+                      >
+                        Record Shots
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          {allShootersFinished ? (
+            <div>
+              <button onClick={copyResults}>Copy Results</button>
+            </div>
+          ) : (
+            <GenericScorecard 
+              shotsDistribution={shotsDistribution} 
+              stationNames={stationNames}
+              truePairsMatrix={truePairsMatrix} 
+            />
+          )}
+
+          <div className="action-buttons">
+            <button onClick={() => setIsRenamingStations(true)}>Rename Stations</button>
+            <button onClick={() => navigate('/')}>End Game</button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

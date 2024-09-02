@@ -20,7 +20,6 @@ const RecordShots = () => {
   const [currentStation, setCurrentStation] = useState(initialStation);
 
   const stationNames = game.stationNames || Array.from({ length: initialShots.length }, (_, i) => `Station ${i + 1}`);
-  console.log(currentStation);
 
   useEffect(() => {
     setShots(shooter.shots || []);
@@ -136,7 +135,6 @@ const RecordShots = () => {
       return currentStation;
     }
 
-    console.log('Current Station: ', currentStation);
     const startStationIndex = currentStation - 1; // Convert to zero-based index
   
     for (let i = 0; i < maxStations; i++) {
@@ -144,11 +142,8 @@ const RecordShots = () => {
       const stationIndex = (startStationIndex + i) % maxStations;
       const station = stationIndex + 1;
       const shotsAtStation = shots.filter(shot => shot.station === station).length;
-  
-      console.log('Shots: ', shotsAtStation);
 
       if (shotsAtStation < initialShots[stationIndex]) {
-        console.log('Return: ', station);
         return station;
       }
     }
