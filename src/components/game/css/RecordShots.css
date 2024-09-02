@@ -41,25 +41,6 @@
   color: white;
 }
 
-.shots-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.station-row {
-  display: flex;
-  align-items: center;
-}
-
-.station-name {
-  width: 120px; /* Adjust width as needed */
-  text-align: right;
-  margin-right: 10px;
-  font-size: 16px;
-  font-weight: bold;
-}
-
 .station-grid {
   display: grid;
   gap: 5px;

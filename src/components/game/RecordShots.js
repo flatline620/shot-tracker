@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './css/RecordShots.css'; 
+import StationGrid from './StationGrid'; // Adjust the path as necessary
 
 const RecordShots = () => {
   const location = useLocation();
@@ -259,19 +260,13 @@ const RecordShots = () => {
         </button>
       </div>
       <h2>Recorded Shots</h2>
-      <div className="shots-container">
-        {shotsByStation.map((stationShots, stationIndex) => (
-          <div key={stationIndex} className="station-row">
-            <div className="station-name">{stationNames[stationIndex]}</div>
-            <div
-              className="station-grid"
-              style={{ gridTemplateColumns: `repeat(${initialShots[stationIndex]}, 40px)` }}
-            >
-              {renderStationGrid(stationIndex)}
-            </div>
-          </div>
-        ))}
-      </div>
+      <StationGrid
+        stationShots={shotsByStation}
+        stationNames={stationNames}
+        initialShots={initialShots}
+        renderStationGrid={renderStationGrid}
+      />
+
     </div>
   );
 };

@@ -30,3 +30,17 @@
     margin-top: 10px;
   }
   
+  .grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .grid-item {
+    flex: 1 1 calc(50% - 20px);
+    box-sizing: border-box;
+  }
+
+  .station-grid-container {
+    margin-bottom: 5px; /* Reduce the space between rows of StationGrid components */
+  }

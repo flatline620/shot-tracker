@@ -1,0 +1,45 @@
+.shots-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .station-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .station-name {
+    width: 120px; /* Adjust width as needed */
+    text-align: right;
+    margin-right: 10px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .station-grid {
+    display: grid;
+    gap: 5px;
+  }
+
+  .shot {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 5px;
+    cursor: default;
+  }
+  
+  .shot.hit {
+    background-color: green;
+    color: white;
+  }
+  
+  .shot.miss {
+    background-color: red;
+    color: white;
+  }
+  
+  .shot.empty {
+    background-color: lightgrey;
+  }

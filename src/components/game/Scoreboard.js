@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import GenericScorecard from './GenericScorecard';
 import StationNaming from './StationNaming'; // Import StationNaming
+import StationGrid from './StationGrid'; // Import StationGrid
 import './css/Scoreboard.css';
 
 const Scoreboard = () => {
@@ -187,22 +188,50 @@ const Scoreboard = () => {
             </tbody>
           </table>
 
-          {allShootersFinished ? (
-            <div>
-              <button onClick={copyResults}>Copy Results</button>
+          <GenericScorecard 
+            shotsDistribution={shotsDistribution} 
+            stationNames={stationNames}
+            truePairsMatrix={truePairsMatrix} 
+          />
+
+          {allShootersFinished && (
+            <div className="grid-container">
+              {shooters.map((shooter, index) => (
+                <div key={index} className="grid-item">
+                  <h3>{shooter.name}</h3>
+                  <div className="station-grid-container">
+                    <StationGrid
+                      stationShots={shooter.shots || []}
+                      stationNames={stationNames}
+                      initialShots={shotsDistribution}
+                      renderStationGrid={(stationIndex) => (
+                        (shooter.shots || [])
+                          .filter(shot => shot.station === stationIndex + 1)
+                          .map((shot, shotIndex) => (
+                            <div
+                              key={shotIndex}
+                              className={`shot ${shot.hit ? 'hit' : 'miss'}`}
+                            />
+                          ))
+                      )}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-          ) : (
-            <GenericScorecard 
-              shotsDistribution={shotsDistribution} 
-              stationNames={stationNames}
-              truePairsMatrix={truePairsMatrix} 
-            />
           )}
 
+          {allShootersFinished ? (
           <div className="action-buttons">
-            <button onClick={() => setIsRenamingStations(true)}>Rename Stations</button>
+            <button onClick={copyResults}>Copy Results</button>
             <button onClick={() => navigate('/')}>End Game</button>
           </div>
+          ) : (
+            <div className="action-buttons">
+              <button onClick={() => setIsRenamingStations(true)}>Rename Stations</button>
+              <button onClick={() => navigate('/')}>End Game</button>
+            </div>
+          )}
         </>
       )}
     </div>
