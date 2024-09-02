@@ -181,6 +181,26 @@ const RecordShots = () => {
     navigate('/scoreboard', { state: { game } });
   };
 
+  const renderStationGrid = (stationIndex) => {
+    const shotsForStation = shotsByStation[stationIndex];
+    return (
+      <div className="station-grid" style={{ gridTemplateColumns: `repeat(${initialShots[stationIndex]}, 40px)` }}>
+        {Array.from({ length: initialShots[stationIndex] }).map((_, shotIndex) => {
+          const shot = shotsForStation.find(s => s.shotIndex === shotIndex);
+          const isTruePair = truePairsMatrix[stationIndex][shotIndex] || false;
+          return (
+            <button
+              key={shotIndex}
+              className={`shot ${shot ? (shot.hit ? 'hit' : 'miss') : isTruePair ? 'true-pair' : 'empty'}`}
+            >
+              {shot ? (shot.hit ? '/' : 'O') : isTruePair ? 'TP' : '-'}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="record-shots">
       <h1>Record Shots for {shooter.name}</h1>
@@ -226,6 +246,18 @@ const RecordShots = () => {
           Undo
         </button>
       </div>
+      <div className="selected-station-preview">
+        <h2>Current Station Preview</h2>
+        {renderStationGrid(currentStation - 1)}
+      </div>
+      <div className="button-container">
+        <button className="record-button" onClick={handleRecordShots}>
+          Record Shots
+        </button>
+        <button className="return-button" onClick={handleCancelShooter}>
+          Cancel Shooter
+        </button>
+      </div>
       <h2>Recorded Shots</h2>
       <div className="shots-container">
         {shotsByStation.map((stationShots, stationIndex) => (
@@ -235,29 +267,10 @@ const RecordShots = () => {
               className="station-grid"
               style={{ gridTemplateColumns: `repeat(${initialShots[stationIndex]}, 40px)` }}
             >
-              {Array.from({ length: initialShots[stationIndex] }).map((_, shotIndex) => {
-                const shot = stationShots.find(s => s.shotIndex === shotIndex);
-                const isTruePair = truePairsMatrix[stationIndex][shotIndex] || false;
-                return (
-                  <button
-                    key={shotIndex}
-                    className={`shot ${shot ? (shot.hit ? 'hit' : 'miss') : isTruePair ? 'true-pair' : 'empty'}`}
-                  >
-                    {shot ? (shot.hit ? '/' : 'O') : isTruePair ? 'TP' : '-'}
-                  </button>
-                );
-              })}
+              {renderStationGrid(stationIndex)}
             </div>
           </div>
         ))}
-      </div>
-      <div className="button-container">
-        <button className="record-button" onClick={handleRecordShots}>
-          Record Shots
-        </button>
-        <button className="return-button" onClick={handleCancelShooter}>
-          Cancel Shooter
-        </button>
       </div>
     </div>
   );

@@ -44,7 +44,6 @@
 .shots-container {
   display: flex;
   flex-direction: column;
-
   gap: 10px;
 }
 
@@ -104,13 +103,11 @@
   background-color: #007bff; /* Specific color for the return button */
 }
 
-
 .record-button:hover,
 .return-button:hover {
   background-color: #0056b3; /* Darker shade for hover effect */
 }
 
-/* Add this to RecordShots.css */
 /* Style for True Pair shots */
 .shot.true-pair {
   background-color: lightgrey; /* Background color for True Pair */
@@ -121,4 +118,17 @@
 .shot.true-pair:hover {
   background-color: grey; /* Darker color on hover */
   color: #4d4d4d; /* Even darker grey for hover state */
+}
+
+/* Centering the Current Station Preview */
+.selected-station-preview {
+  margin-top: 20px; /* Space above the preview */
+  text-align: center;
+}
+
+.selected-station-preview .station-grid {
+  display: grid;
+  gap: 5px;
+  justify-content: center; /* Center the grid horizontally */
+  margin: 0 auto; /* Center the grid horizontally */
 }
