@@ -44,7 +44,6 @@ const Scoreboard = () => {
   // Determine the highest score possible
   const highestScore = allShootersFinished
     ? Math.max(...shooters.map(shooter => {
-        const totalShots = shooter.shotsTaken || 0;
         const numHits = shooter.numHits || 0;
         const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
           const shotsTakenByStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1).length;
