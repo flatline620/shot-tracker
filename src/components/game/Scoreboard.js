@@ -206,7 +206,7 @@ const Scoreboard = () => {
                 return (
                   <tr 
                     key={index} 
-                    style={{ backgroundColor: isTopScore ? 'gold' : (isCurrentShooter ? 'lightgreen' : 'white') }}
+                    style={{ backgroundColor: isTopScore ? 'gold' : (isCurrentShooter && !allShootersFinished ? 'lightgreen' : 'white') }}
                   >
                     <td style={{ fontStyle: isCurrentShooter ? 'italic' : 'normal' }}>{shooter.name}</td>
                     <td>{getStationsShotAt(shooter)}</td>
