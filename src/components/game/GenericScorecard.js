@@ -5,7 +5,7 @@ import './css/GenericScorecard.css'; // Import CSS
 
 const GenericScorecard = ({ shotsDistribution, stationNames, truePairsMatrix }) => {
   return (
-    <div className="scorecard-container">
+    <div>
       <h2>Scorecard</h2>
       {shotsDistribution.map((shotsAtStation, stationIndex) => (
         <div key={stationIndex} className="station-row">

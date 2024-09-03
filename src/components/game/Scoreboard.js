@@ -41,6 +41,19 @@ const Scoreboard = () => {
     return shotsRemaining <= 0;
   });
 
+  // Determine the highest score possible
+  const highestScore = allShootersFinished
+    ? Math.max(...shooters.map(shooter => {
+        const totalShots = shooter.shotsTaken || 0;
+        const numHits = shooter.numHits || 0;
+        const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
+          const shotsTakenByStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1).length;
+          return acc + Math.max(shotsAtStation - shotsTakenByStation, 0);
+        }, 0);
+        return numHits + shotsRemaining;
+      }))
+    : null;
+
   // Helper function to pad text to a fixed width with extra space
   const padText = (text, width) => {
     return text.toString().padEnd(width, ' ');
@@ -151,7 +164,7 @@ const Scoreboard = () => {
   };
 
   return (
-    <div className="scoreboard">
+    <div className="scoreboard" ref={screenshotRef}>
       {isRenamingStations ? (
         <StationNaming
           stationNames={localStationNames}
@@ -188,13 +201,13 @@ const Scoreboard = () => {
                 }, 0);
 
                 const maxScorePossible = numHits + shotsRemaining;
-
                 const isCurrentShooter = shooter === currentShooter;
+                const isTopScore = allShootersFinished && maxScorePossible === highestScore;
 
                 return (
                   <tr 
                     key={index} 
-                    style={{ backgroundColor: isCurrentShooter ? 'lightgreen' : 'white' }}
+                    style={{ backgroundColor: isTopScore ? 'gold' : (isCurrentShooter ? 'lightgreen' : 'white') }}
                   >
                     <td style={{ fontStyle: isCurrentShooter ? 'italic' : 'normal' }}>{shooter.name}</td>
                     <td>{getStationsShotAt(shooter)}</td>
@@ -218,45 +231,54 @@ const Scoreboard = () => {
             </tbody>
           </table>
 
-          <GenericScorecard 
-            shotsDistribution={shotsDistribution} 
-            stationNames={stationNames}
-            truePairsMatrix={truePairsMatrix} 
-          />
-
-          {allShootersFinished && (
-            <div className="grid-container" ref={screenshotRef}>
-              {shooters.map((shooter, index) => (
-                <div key={index} className="grid-item">
-                  <h3>{shooter.name}</h3>
-                  <div className="station-grid-container">
-                    <StationGrid
-                      stationShots={shooter.shots || []}
-                      stationNames={stationNames}
-                      initialShots={shotsDistribution}
-                      renderStationGrid={(stationIndex) => (
-                        (shooter.shots || [])
-                          .filter(shot => shot.station === stationIndex + 1)
-                          .map((shot, shotIndex) => (
-                            <div
-                              key={shotIndex}
-                              className={`shot ${shot.hit ? 'hit' : 'miss'}`}
-                            />
-                          ))
-                      )}
-                    />
+          <div className="scorecard-container">
+            {allShootersFinished ? (
+              <div className="grid-container">
+                {shooters.map((shooter, index) => (
+                  <div key={index} className="grid-item">
+                    <h3>{shooter.name}</h3>
+                    <div className="station-grid-container">
+                      <StationGrid
+                        stationShots={shooter.shots || []}
+                        stationNames={stationNames}
+                        initialShots={shotsDistribution}
+                        renderStationGrid={(stationIndex) => {
+                          const shotsForStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1);
+                          return (
+                            <>
+                              {shotsForStation.map((shot, shotIndex) => (
+                                <div
+                                  key={shotIndex}
+                                  className={`shot ${shot.hit ? 'hit' : 'miss'}`}
+                                >
+                                  {truePairsMatrix[stationIndex]?.[shotIndex] ? (
+                                    <span className="tp-label">TP</span>
+                                  ) : ''}
+                                </div>
+                              ))}
+                            </>
+                          );
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            ) : (
+              <GenericScorecard 
+                shotsDistribution={shotsDistribution} 
+                stationNames={stationNames}
+                truePairsMatrix={truePairsMatrix} 
+              />
+            )}
+          </div>
 
           {allShootersFinished ? (
-          <div className="action-buttons">
-            <button onClick={copyResults}>Copy Results</button>
-            <button onClick={handleCapture}>Copy Scoreboard</button>
-            <button onClick={() => navigate('/')}>End Game</button>
-          </div>
+            <div className="action-buttons">
+              <button onClick={copyResults}>Copy Results</button>
+              <button onClick={handleCapture}>Copy Scoreboard</button>
+              <button onClick={() => navigate('/')}>End Game</button>
+            </div>
           ) : (
             <div className="action-buttons">
               <button onClick={() => setIsRenamingStations(true)}>Rename Stations</button>

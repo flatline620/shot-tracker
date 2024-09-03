@@ -44,3 +44,20 @@
   .station-grid-container {
     margin-bottom: 5px; /* Reduce the space between rows of StationGrid components */
   }
+
+  .shot {
+    position: relative; /* Make the shot div a containing block for absolute positioning */
+    width: 30px; /* Adjust as necessary */
+    height: 30px; /* Adjust as necessary */
+    border: 1px solid #ddd; /* Example border */
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    background-color: #f9f9f9; /* Example background color */
+  }
+
+  .tp-label {
+    position: absolute; /* Absolute positioning within the shot div */
+    color: white; /* Example color for TP label */
+    font-size: 12px; /* Adjust size as needed */
+  }
