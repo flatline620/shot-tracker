@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas';
 import GenericScorecard from './GenericScorecard';
 import StationNaming from './StationNaming'; // Import StationNaming
 import StationGrid from './StationGrid'; // Import StationGrid
@@ -12,6 +13,7 @@ const Scoreboard = () => {
   const [localStationNames, setLocalStationNames] = useState(location.state?.game?.stationNames || []);
   const game = location.state?.game || { shooters: [] };
   const currentShooter = location.state?.currentShooter || (game.shooters.length > 0 ? game.shooters[0] : null);
+  const screenshotRef = useRef(null); // Ref to capture the content
 
   if (!game || !game.shooters || !game.shotsDistribution || !game.stationNames || !game.truePairsMatrix) {
     return <div>No game data found.</div>;
@@ -120,6 +122,34 @@ const Scoreboard = () => {
     setIsRenamingStations(false);
   };
 
+  const handleCapture = async () => {
+    if (screenshotRef.current) {
+      try {
+        // Capture the DOM element
+        const canvas = await html2canvas(screenshotRef.current);
+        
+        // Convert canvas to Blob in 'image/png' format
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            try {
+              // Use Clipboard API to copy the image to clipboard
+              await navigator.clipboard.write([
+                new ClipboardItem({
+                  [blob.type]: blob
+                })
+              ]);
+              alert('Image copied to clipboard!');
+            } catch (err) {
+              console.error('Failed to copy image to clipboard:', err);
+            }
+          }
+        }, 'image/png');
+      } catch (err) {
+        console.error('Failed to capture screenshot:', err);
+      }
+    }
+  };
+
   return (
     <div className="scoreboard">
       {isRenamingStations ? (
@@ -195,7 +225,7 @@ const Scoreboard = () => {
           />
 
           {allShootersFinished && (
-            <div className="grid-container">
+            <div className="grid-container" ref={screenshotRef}>
               {shooters.map((shooter, index) => (
                 <div key={index} className="grid-item">
                   <h3>{shooter.name}</h3>
@@ -224,6 +254,7 @@ const Scoreboard = () => {
           {allShootersFinished ? (
           <div className="action-buttons">
             <button onClick={copyResults}>Copy Results</button>
+            <button onClick={handleCapture}>Copy Scoreboard</button>
             <button onClick={() => navigate('/')}>End Game</button>
           </div>
           ) : (
