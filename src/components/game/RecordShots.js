@@ -127,8 +127,8 @@ const RecordShots = () => {
 
     const updatedGame = { ...game, shooters: updatedShooters, currentStation: findNextIncompleteStation(allShootersDone) };
 
-    const nextShooter = findNextShooter(allShootersDone);
-    navigate('/scoreboard', { state: { game: updatedGame, currentShooter: nextShooter } });
+    const nextShooterIndex = findNextShooter(allShootersDone);
+    navigate('/scoreboard', { state: { game: updatedGame, currentShooter: updatedShooters[nextShooterIndex] } });
   };
 
   const findNextIncompleteStation = (allShootersDone) => {
@@ -161,7 +161,7 @@ const RecordShots = () => {
       nextIndex = (nextIndex + 1) % game.shooters.length;
     }
 
-    return game.shooters[nextIndex];
+    return nextIndex;
   };
 
   const handleStationChange = (e) => {
