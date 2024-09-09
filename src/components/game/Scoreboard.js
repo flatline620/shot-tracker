@@ -140,22 +140,11 @@ const Scoreboard = () => {
         // Capture the DOM element
         const canvas = await html2canvas(screenshotRef.current);
         
-        // Convert canvas to Blob in 'image/png' format
-        canvas.toBlob(async (blob) => {
-          if (blob) {
-            try {
-              // Use Clipboard API to copy the image to clipboard
-              await navigator.clipboard.write([
-                new ClipboardItem({
-                  [blob.type]: blob
-                })
-              ]);
-              alert('Image copied to clipboard!');
-            } catch (err) {
-              console.error('Failed to copy image to clipboard:', err);
-            }
-          }
-        }, 'image/png');
+        const dataURL = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'screenshot.png';
+        link.click();
       } catch (err) {
         console.error('Failed to capture screenshot:', err);
       }
@@ -163,130 +152,134 @@ const Scoreboard = () => {
   };
 
   return (
-    <div className="scoreboard" ref={screenshotRef}>
-      {isRenamingStations ? (
-        <StationNaming
-          stationNames={localStationNames}
-          onStationNameChange={handleStationNameChange}
-          onConfirm={handleConfirmStationNames}
-          onCancel={handleCancelStationNaming}
-        />
-      ) : (
-        <>
-          <h1>Scoreboard</h1>
-          <table>
-            <thead>
-              <tr>
-                <th>Shooter</th>
-                <th>Stations Shot</th>
-                <th>Shots Taken</th>
-                <th>Num Hits</th>
-                <th>Shots Remaining</th>
-                <th>Max Score Possible</th>
-                <th>Current Streak</th>
-                <th>Longest Streak</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shooters.map((shooter, index) => {
-                const totalShots = shooter.shotsTaken || 0;
-                const numHits = shooter.numHits || 0;
+    <div>
+      <div className="scoreboard" ref={screenshotRef}>
+        {isRenamingStations ? (
+          <StationNaming
+            stationNames={localStationNames}
+            onStationNameChange={handleStationNameChange}
+            onConfirm={handleConfirmStationNames}
+            onCancel={handleCancelStationNaming}
+          />
+        ) : (
+          <>
+            <h1>Scoreboard</h1>
+            <table>
+              <thead>
+                <tr>
+                  <th>Shooter</th>
+                  <th>Stations Shot</th>
+                  <th>Shots Taken</th>
+                  <th>Num Hits</th>
+                  <th>Shots Remaining</th>
+                  <th>Max Score Possible</th>
+                  <th>Current Streak</th>
+                  <th>Longest Streak</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {shooters.map((shooter, index) => {
+                  const totalShots = shooter.shotsTaken || 0;
+                  const numHits = shooter.numHits || 0;
 
-                const shotsTakenByStation = shooter.shots || [];
-                const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
-                  const shotsAtCurrentStation = shotsTakenByStation.filter(shot => shot.station === stationIndex + 1).length;
-                  return acc + Math.max(shotsAtStation - shotsAtCurrentStation, 0);
-                }, 0);
+                  const shotsTakenByStation = shooter.shots || [];
+                  const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
+                    const shotsAtCurrentStation = shotsTakenByStation.filter(shot => shot.station === stationIndex + 1).length;
+                    return acc + Math.max(shotsAtStation - shotsAtCurrentStation, 0);
+                  }, 0);
 
-                const maxScorePossible = numHits + shotsRemaining;
-                const isCurrentShooter = shooter === currentShooter;
-                const isTopScore = allShootersFinished && maxScorePossible === highestScore;
+                  const maxScorePossible = numHits + shotsRemaining;
+                  const isCurrentShooter = shooter === currentShooter;
+                  const isTopScore = allShootersFinished && maxScorePossible === highestScore;
 
-                return (
-                  <tr 
-                    key={index} 
-                    style={{ backgroundColor: isTopScore ? 'gold' : (isCurrentShooter && !allShootersFinished ? 'lightgreen' : 'white') }}
-                  >
-                    <td style={{ fontStyle: isCurrentShooter ? 'italic' : 'normal' }}>{shooter.name}</td>
-                    <td>{getStationsShotAt(shooter)}</td>
-                    <td>{totalShots}</td>
-                    <td>{numHits}</td>
-                    <td>{shotsRemaining}</td>
-                    <td>{maxScorePossible}</td>
-                    <td>{shooter.currentStreak || 0}</td>
-                    <td>{shooter.maxStreak || 0}</td>
-                    <td>
-                      <button 
-                        onClick={() => handleRecordShots(shooter)} 
-                        disabled={shotsRemaining <= 0}
-                      >
-                        Record Shots
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  return (
+                    <tr 
+                      key={index} 
+                      style={{ backgroundColor: isTopScore ? 'gold' : (isCurrentShooter && !allShootersFinished ? 'lightgreen' : 'white') }}
+                    >
+                      <td style={{ fontStyle: isCurrentShooter && !allShootersFinished ? 'italic' : 'normal' }}>{shooter.name}</td>
+                      <td>{getStationsShotAt(shooter)}</td>
+                      <td>{totalShots}</td>
+                      <td>{numHits}</td>
+                      <td>{shotsRemaining}</td>
+                      <td>{maxScorePossible}</td>
+                      <td>{shooter.currentStreak || 0}</td>
+                      <td>{shooter.maxStreak || 0}</td>
+                      <td>
+                        <button 
+                          onClick={() => handleRecordShots(shooter)} 
+                          disabled={shotsRemaining <= 0}
+                        >
+                          Record Shots
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
 
-          <div className="scorecard-container">
-            {allShootersFinished ? (
-              <div className="grid-container">
-                {shooters.map((shooter, index) => (
-                  <div key={index} className="grid-item">
-                    <h3>{shooter.name}</h3>
-                    <div className="station-grid-container">
-                      <StationGrid
-                        stationShots={shooter.shots || []}
-                        stationNames={stationNames}
-                        initialShots={shotsDistribution}
-                        renderStationGrid={(stationIndex) => {
-                          const shotsForStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1);
-                          return (
-                            <>
-                              {shotsForStation.map((shot, shotIndex) => (
-                                <div
-                                  key={shotIndex}
-                                  className={`shot ${shot.hit ? 'hit' : 'miss'}`}
-                                >
-                                  {truePairsMatrix[stationIndex]?.[shotIndex] ? (
-                                    <span className="tp-label">TP</span>
-                                  ) : ''}
-                                </div>
-                              ))}
-                            </>
-                          );
-                        }}
-                      />
+            <div className="scorecard-container">
+              {allShootersFinished ? (
+                <div className="grid-container">
+                  {shooters.map((shooter, index) => (
+                    <div key={index} className="grid-item">
+                      <h3>{shooter.name}</h3>
+                      <div className="station-grid-container">
+                        <StationGrid
+                          stationShots={shooter.shots || []}
+                          stationNames={stationNames}
+                          initialShots={shotsDistribution}
+                          renderStationGrid={(stationIndex) => {
+                            const shotsForStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1);
+                            return (
+                              <>
+                                {shotsForStation.map((shot, shotIndex) => (
+                                  <div
+                                    key={shotIndex}
+                                    className={`shot ${shot.hit ? 'hit' : 'miss'}`}
+                                  >
+                                    {truePairsMatrix[stationIndex]?.[shotIndex] ? (
+                                      <span className="tp-label">TP</span>
+                                    ) : ''}
+                                  </div>
+                                ))}
+                              </>
+                            );
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <GenericScorecard 
-                shotsDistribution={shotsDistribution} 
-                stationNames={stationNames}
-                truePairsMatrix={truePairsMatrix} 
-              />
-            )}
-          </div>
+                  ))}
+                </div>
+              ) : (
+                <GenericScorecard 
+                  shotsDistribution={shotsDistribution} 
+                  stationNames={stationNames}
+                  truePairsMatrix={truePairsMatrix} 
+                />
+              )}
+            </div>
 
-          {allShootersFinished ? (
-            <div className="action-buttons">
-              <button onClick={copyResults}>Copy Results</button>
-              <button onClick={handleCapture}>Copy Scoreboard</button>
-              <button onClick={() => navigate('/')}>End Game</button>
-            </div>
-          ) : (
-            <div className="action-buttons">
-              <button onClick={() => setIsRenamingStations(true)}>Rename Stations</button>
-              <button onClick={() => navigate('/')}>End Game</button>
-            </div>
-          )}
-        </>
+
+          </>
+        )}
+      </div>      
+      {allShootersFinished ? (
+        <div className="action-buttons">
+          <button onClick={copyResults}>Copy Results</button>
+          <button onClick={handleCapture}>Copy Scoreboard</button>
+          <button onClick={() => navigate('/')}>End Game</button>
+        </div>
+      ) : (
+        <div className="action-buttons">
+          <button onClick={() => setIsRenamingStations(true)}>Rename Stations</button>
+          <button onClick={() => navigate('/')}>End Game</button>
+        </div>
       )}
     </div>
+
   );
 };
 

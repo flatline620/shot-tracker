@@ -154,15 +154,13 @@ const GameDetails = ({ games, onUpdateGame }) => {
     };
 
     const handleAddShooter = () => {
-        if (newShooter.trim() && shooters.length < 4) {
-            setShooters([...shooters, {
-                name: newShooter,
-                shotsTaken: 0,
-                numHits: 0,
-                maxScore: 0
-            }]);
-            setNewShooter('');
-        }
+        setShooters([...shooters, {
+            name: newShooter,
+            shotsTaken: 0,
+            numHits: 0,
+            maxScore: 0
+        }]);
+        setNewShooter('');
     };
 
     const handleRemoveShooter = (shooterToRemove) => {
@@ -170,7 +168,7 @@ const GameDetails = ({ games, onUpdateGame }) => {
     };
 
     // Check if the add shooter input should be marked as invalid
-    const isShooterInputInvalid = newShooter.trim() === '' && shooters.length >= 4;
+    const isShooterInputInvalid = newShooter.trim() === '';
 
     return (
         <div className="game-details">
