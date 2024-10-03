@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ShooterInfo from './ShooterInfo';
+import GameInfo from './GameInfo';
 import StationNaming from './StationNaming';
 import './css/GameDetails.css'; // Ensure the correct path to the CSS file
 
@@ -57,6 +59,14 @@ const generateTruePairsMatrix = (shots, truePairsOption) => {
     return truePairsMatrix;
 };
 
+
+
+
+
+
+
+
+
 const GameDetails = ({ games, onUpdateGame }) => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -73,13 +83,14 @@ const GameDetails = ({ games, onUpdateGame }) => {
 
     // State for station naming
     const [stationNames, setStationNames] = useState(Array(game.numStations || 1).fill(''));
-    const [isNamingStations, setIsNamingStations] = useState(false);
 
     // State for True Pairs option
     const [truePairsOption, setTruePairsOption] = useState('None');
 
     // State for Rotate Shooters
     const [rotateShooters, setRotateShooters] = useState(true); // Default to true
+
+    const [currentStep, setCurrentStep] = useState(1);
 
     useEffect(() => {
         setNumStations(game.numStations || '');
@@ -101,8 +112,20 @@ const GameDetails = ({ games, onUpdateGame }) => {
         );
     };
 
-    // Function to handle starting shooting
-    const handleStartShooting = () => {
+    const handleShooterInfo = () => {
+        if (validateForm()) {
+            const updatedGame = {
+                ...game,
+                shooters,
+                rotateShooters // Add this line
+            };
+            onUpdateGame(index, updatedGame);
+
+            handleNextStep();
+        }
+    };
+
+    const handleGameInfo = () => {
         if (validateForm()) {
             let shotsDistribution = distributeShots(
                 parseInt(numStations, 10),
@@ -119,38 +142,28 @@ const GameDetails = ({ games, onUpdateGame }) => {
                 minShots: parseInt(minShots, 10),
                 maxShots: parseInt(maxShots, 10),
                 totalShots: parseInt(totalShots, 10),
-                shooters,
-                stationNames,
                 shotsDistribution,
-                truePairsMatrix,
-                rotateShooters // Add this line
+                truePairsMatrix
             };
             onUpdateGame(index, updatedGame);
-            setIsNamingStations(true);
+
+            handleNextStep();
         }
     };
-    
-    const handleStationNameChange = (index, name) => {
-        const updatedStationNames = [...stationNames];
-        updatedStationNames[index] = name;
-        setStationNames(updatedStationNames);
-    };
 
-    const handleConfirmStationNames = () => {
+    // Function to handle starting shooting
+    const handleStartShooting = () => {
         // Replace empty names with default "Station X"
         const updatedStationNames = stationNames.map((name, idx) => name.trim() ? name : `Station ${idx + 1}`);
 
         const updatedGame = {
             ...game,
-            numStations: parseInt(numStations, 10),
-            minShots: parseInt(minShots, 10),
-            maxShots: parseInt(maxShots, 10),
-            totalShots: parseInt(totalShots, 10),
-            shooters,
             stationNames: updatedStationNames
         };
         onUpdateGame(index, updatedGame);
+
         navigate('/scoreboard', { state: { game: updatedGame } });
+
     };
 
     const handleAddShooter = () => {
@@ -167,8 +180,13 @@ const GameDetails = ({ games, onUpdateGame }) => {
         setShooters(shooters.filter(shooter => shooter.name !== shooterToRemove));
     };
 
-    // Check if the add shooter input should be marked as invalid
-    const isShooterInputInvalid = newShooter.trim() === '';
+    const handleNextStep = () => {
+        setCurrentStep((prevStep) => prevStep + 1);
+    };
+
+    const handlePreviousStep = () => {
+        setCurrentStep((prevStep) => prevStep - 1);
+    };
 
     return (
         <div className="game-details">
@@ -176,170 +194,95 @@ const GameDetails = ({ games, onUpdateGame }) => {
             <p>Location: {game.location}</p>
             <p>Date: {game.date}</p>
 
-            {!isNamingStations ? (
-                <>
-                    <form className="game-form">
-                        <div className="form-row">
-                            <label htmlFor="numStations">Number of Stations:</label>
-                            <input
-                                id="numStations"
-                                type="number"
-                                value={numStations}
-                                onChange={(e) => setNumStations(e.target.value)}
-                                className={numStations <= 0 ? 'invalid' : ''}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-row">
-                            <label htmlFor="minShots">Min Shots per Station:</label>
-                            <input
-                                id="minShots"
-                                type="number"
-                                value={minShots}
-                                onChange={(e) => setMinShots(e.target.value)}
-                                className={minShots <= 0 ? 'invalid' : ''}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-row">
-                            <label htmlFor="maxShots">Max Shots per Station:</label>
-                            <input
-                                id="maxShots"
-                                type="number"
-                                value={maxShots}
-                                onChange={(e) => setMaxShots(e.target.value)}
-                                className={maxShots <= 0 ? 'invalid' : ''}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-row">
-                            <label htmlFor="totalShots">Total Shots:</label>
-                            <input
-                                id="totalShots"
-                                type="number"
-                                value={totalShots}
-                                onChange={(e) => setTotalShots(e.target.value)}
-                                className={totalShots <= 0 ? 'invalid' : ''}
-                                required
-                            />
-                        </div>
-                    </form>
-
-                    <div className="shooters-section">
-                        <h2>Shooters</h2>
-                        <div className="rotate-shooters-container">
-                            <label htmlFor="rotateShooters">
-                                <input
-                                    type="checkbox"
-                                    id="rotateShooters"
-                                    checked={rotateShooters}
-                                    onChange={(e) => setRotateShooters(e.target.checked)}
-                                />
-                                Rotate Shooters
-                            </label>
-                        </div>
-                        <div className={`input-row ${isShooterInputInvalid ? 'invalid' : ''}`}>
-                            <input
-                            type="text"
-                            value={newShooter}
-                            onChange={(e) => setNewShooter(e.target.value)}
-                            placeholder="Add new shooter"
-                            className={isShooterInputInvalid ? 'invalid' : ''}
-                            />
-                            <button
-                            type="button"
-                            onClick={handleAddShooter}
-                            className={isShooterInputInvalid ? 'disabled' : ''}
-                            disabled={isShooterInputInvalid}
-                            >
-                            Add Shooter
-                            </button>
-                        </div>
-                        <ul>
-                            {shooters.map(shooter => (
-                            <li key={shooter.name}>
-                                <span className="name-column">{shooter.name}</span>
-                                <button className="remove-button" type="button" onClick={() => handleRemoveShooter(shooter.name)}>Remove</button>
-                            </li>
-                            ))}
-                        </ul>
-                    </div>
-
-
-                    <div className="true-pairs-container">
-                        <label className="true-pairs-label">True Pairs:</label>
-                        <div className="radio-group">
-                            <div className="radio-item">
-                                <input
-                                    type="radio"
-                                    id="truePairsAll"
-                                    name="truePairs"
-                                    value="All"
-                                    checked={truePairsOption === 'All'}
-                                    onChange={(e) => setTruePairsOption(e.target.value)}
-                                />
-                                <label htmlFor="truePairsAll">All</label>
-                            </div>
-                            <div className="radio-item">
-                                <input
-                                    type="radio"
-                                    id="truePairsRandom"
-                                    name="truePairs"
-                                    value="Random"
-                                    checked={truePairsOption === 'Random'}
-                                    onChange={(e) => setTruePairsOption(e.target.value)}
-                                />
-                                <label htmlFor="truePairsRandom">Random</label>
-                            </div>
-                            <div className="radio-item">
-                                <input
-                                    type="radio"
-                                    id="truePairsNone"
-                                    name="truePairs"
-                                    value="None"
-                                    checked={truePairsOption === 'None'}
-                                    onChange={(e) => setTruePairsOption(e.target.value)}
-                                />
-                                <label htmlFor="truePairsNone">None</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="buttons-container">
-                        <button
-                            type="button"
-                            onClick={handleStartShooting}
-                            className={`start-shooting-button ${!validateForm() ? 'disabled' : ''}`}
-                            disabled={!validateForm()}
-                        >
-                            Start Shooting
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => navigate('/')}
-                            className="back-button"
-                        >
-                            Back to Game List
-                        </button>
-                    </div>
-
-                    <div className="error-messages">
-                        <ul>
-                            {/* Display error messages here */}
-                        </ul>
-                    </div>
-                </>
-            ) : (
-                <StationNaming
-                    stationNames={stationNames}
-                    onStationNameChange={handleStationNameChange}
-                    onConfirm={handleConfirmStationNames}
-                    onCancel={() => setIsNamingStations(false)}
+            {currentStep === 1 && (
+                <ShooterInfo 
+                    shooters={shooters}
+                    newShooter={newShooter}
+                    setNewShooter={setNewShooter}
+                    handleAddShooter={handleAddShooter}
+                    handleRemoveShooter={handleRemoveShooter}
+                    rotateShooters={rotateShooters}
+                    setRotateShooters={setRotateShooters}
                 />
             )}
+
+            {currentStep === 2 && (
+                <GameInfo 
+                    numStations={numStations}
+                    setNumStations={setNumStations}
+                    minShots={minShots}
+                    setMinShots={setMinShots}
+                    maxShots={maxShots}
+                    setMaxShots={setMaxShots}
+                    totalShots={totalShots}
+                    setTotalShots={setTotalShots}
+                    truePairsOption={truePairsOption}
+                    setTruePairsOption={setTruePairsOption}
+                />
+            )}
+
+            {currentStep === 3 && (
+                <StationNaming
+                    stationNames={stationNames}
+                    onStationNameChange={(index, name) => {
+                        const updatedStationNames = [...stationNames];
+                        updatedStationNames[index] = name;
+                        setStationNames(updatedStationNames);
+                    }}
+                />
+            )}
+
+            <div className="buttons-container">
+                {currentStep > 1 && (
+                    <button type="button" onClick={handlePreviousStep} className="back-button">
+                        Back
+                    </button>
+                )}
+                {currentStep === 1 && (
+                    <button type="button" onClick={handleShooterInfo} className="confirm-button">
+                        Next
+                    </button>
+                )}
+                {currentStep === 2 && (
+                    <button type="button" onClick={handleGameInfo} className="confirm-button">
+                        Next
+                    </button>
+                )}
+                {currentStep === 3 && (
+                    <button 
+                        type="button" 
+                        onClick={handleStartShooting}
+                        className="confirm-button finish-button"
+                    >
+                        Start Game
+                    </button>
+                )}
+            </div>
+
+            {/* <div className="buttons-container">
+                <button
+                    type="button"
+                    onClick={handleStartShooting}
+                    className={`start-shooting-button ${!validateForm() ? 'disabled' : ''}`}
+                    disabled={!validateForm()}
+                >
+                    Start Shooting
+                </button>
+                <button
+                    type="button"
+                    onClick={() => navigate('/')}
+                    className="back-button"
+                >
+                    Back to Game List
+                </button>
+            </div> */}
+
+            <div className="error-messages">
+                <ul>
+                    {/* Display error messages here */}
+                </ul>
+            </div>
+
         </div>
     );
 };

@@ -155,12 +155,32 @@ const Scoreboard = () => {
     <div>
       <div className="scoreboard" ref={screenshotRef}>
         {isRenamingStations ? (
-          <StationNaming
-            stationNames={localStationNames}
-            onStationNameChange={handleStationNameChange}
-            onConfirm={handleConfirmStationNames}
-            onCancel={handleCancelStationNaming}
-          />
+          <>
+            <StationNaming
+              stationNames={localStationNames}
+              onStationNameChange={handleStationNameChange}
+              onConfirm={handleConfirmStationNames}
+              onCancel={handleCancelStationNaming}
+            />
+
+            <div className="buttons-container">
+              <button
+                  type="button"
+                  onClick={handleConfirmStationNames}
+                  className="confirm-button"
+              >
+                  Confirm
+              </button>
+              <button
+                  type="button"
+                  onClick={handleCancelStationNaming}
+                  className="back-button"
+              >
+                  Cancel
+              </button>
+          </div>
+        </>
+
         ) : (
           <>
             <h1>Scoreboard</h1>
@@ -273,10 +293,13 @@ const Scoreboard = () => {
           <button onClick={() => navigate('/')}>End Game</button>
         </div>
       ) : (
-        <div className="action-buttons">
-          <button onClick={() => setIsRenamingStations(true)}>Rename Stations</button>
-          <button onClick={() => navigate('/')}>End Game</button>
-        </div>
+        !isRenamingStations && (
+          <div className="action-buttons">
+            <button onClick={() => setIsRenamingStations(true)}>Rename Stations</button>
+            <button onClick={() => navigate('/')}>End Game</button>
+          </div>          
+        )
+
       )}
     </div>
 

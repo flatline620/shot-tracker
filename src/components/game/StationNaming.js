@@ -1,7 +1,7 @@
 // src/components/StationNaming.js
 import React from 'react';
 
-const StationNaming = ({ stationNames, onStationNameChange, onConfirm, onCancel }) => {
+const StationNaming = ({ stationNames, onStationNameChange }) => {
     return (
         <div className="station-naming">
             <h2>Station Names</h2>
@@ -16,22 +16,6 @@ const StationNaming = ({ stationNames, onStationNameChange, onConfirm, onCancel 
                     />
                 </div>
             ))}
-            <div className="buttons-container">
-                <button
-                    type="button"
-                    onClick={onConfirm}
-                    className="confirm-button"
-                >
-                    Confirm
-                </button>
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className="back-button"
-                >
-                    Cancel
-                </button>
-            </div>
         </div>
     );
 };
