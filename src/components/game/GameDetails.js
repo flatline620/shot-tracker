@@ -7,11 +7,6 @@ import './css/GameDetails.css'; // Ensure the correct path to the CSS file
 
 // Function to distribute shots
 const distributeShots = (numStations, minShotsPerStation, maxShotsPerStation, totalShots) => {
-    if (numStations <= 0 || minShotsPerStation < 0 || maxShotsPerStation < minShotsPerStation || 
-        totalShots < numStations * minShotsPerStation || totalShots > numStations * maxShotsPerStation) {
-        throw new Error("Invalid parameters.");
-    }
-
     const shots = Array(numStations).fill(minShotsPerStation);
     totalShots -= numStations * minShotsPerStation;
 
@@ -59,14 +54,6 @@ const generateTruePairsMatrix = (shots, truePairsOption) => {
     return truePairsMatrix;
 };
 
-
-
-
-
-
-
-
-
 const GameDetails = ({ games, onUpdateGame }) => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -92,6 +79,8 @@ const GameDetails = ({ games, onUpdateGame }) => {
 
     const [currentStep, setCurrentStep] = useState(1);
 
+    const [errorMessages, setErrorMessages] = useState([]);
+
     useEffect(() => {
         setNumStations(game.numStations || '');
         setMinShots(game.minShots || '');
@@ -101,55 +90,70 @@ const GameDetails = ({ games, onUpdateGame }) => {
         setStationNames(Array(game.numStations || 1).fill('')); // Reset station names
     }, [game]);
 
-    // Function to validate form fields
     const validateForm = () => {
-        return (
-            numStations > 0 &&
-            minShots > 0 &&
-            maxShots > 0 &&
-            totalShots > 0 &&
-            shooters.length > 0
-        );
+        const errors = [];
+        if (numStations <= 0) errors.push("Number of stations must be greater than 0.");
+        if (minShots <= 0) errors.push("Minimum shots must be greater than 0.");
+        if (minShots % 2 !== 0) errors.push("Minimum shots must be an even number.");
+        if (maxShots <= 0) errors.push("Maximum shots must be greater than 0.");
+        if (maxShots % 2 !== 0) errors.push("Maximum shots must be an even number.");
+        if (totalShots <= 0) errors.push("Total shots must be greater than 0.");
+        if (totalShots % 2 !== 0) errors.push("Total shots must be an even number.");
+        if (shooters.length === 0) errors.push("At least one shooter is required.");
+        if (minShots > maxShots) errors.push("Minimum shots cannot be greater than maximum shots.");
+        if (numStations * minShots > totalShots) errors.push("Total shots must allow for minimum shots per station.");
+        if (numStations * maxShots < totalShots) errors.push("Total shots must not exceed maximum shots per station.");
+    
+        return errors;
     };
 
     const handleShooterInfo = () => {
-        if (validateForm()) {
-            const updatedGame = {
-                ...game,
-                shooters,
-                rotateShooters // Add this line
-            };
-            onUpdateGame(index, updatedGame);
-
-            handleNextStep();
+        const errors = validateForm();
+        if (errors.length > 0) {
+            setErrorMessages(errors);
+            return;
         }
+    
+        const updatedGame = {
+            ...game,
+            shooters,
+            rotateShooters,
+        };
+        onUpdateGame(index, updatedGame);
+        handleNextStep();
+        setErrorMessages([]); // Clear errors on success
     };
-
+    
     const handleGameInfo = () => {
-        if (validateForm()) {
-            let shotsDistribution = distributeShots(
-                parseInt(numStations, 10),
-                parseInt(minShots, 10),
-                parseInt(maxShots, 10),
-                parseInt(totalShots, 10)
-            );
-    
-            const truePairsMatrix = generateTruePairsMatrix(shotsDistribution, truePairsOption);
-    
-            const updatedGame = {
-                ...game,
-                numStations: parseInt(numStations, 10),
-                minShots: parseInt(minShots, 10),
-                maxShots: parseInt(maxShots, 10),
-                totalShots: parseInt(totalShots, 10),
-                shotsDistribution,
-                truePairsMatrix
-            };
-            onUpdateGame(index, updatedGame);
-
-            handleNextStep();
+        const errors = validateForm();
+        if (errors.length > 0) {
+            setErrorMessages(errors);
+            return;
         }
+    
+        let shotsDistribution = distributeShots(
+            parseInt(numStations, 10),
+            parseInt(minShots, 10),
+            parseInt(maxShots, 10),
+            parseInt(totalShots, 10)
+        );
+    
+        const truePairsMatrix = generateTruePairsMatrix(shotsDistribution, truePairsOption);
+    
+        const updatedGame = {
+            ...game,
+            numStations: parseInt(numStations, 10),
+            minShots: parseInt(minShots, 10),
+            maxShots: parseInt(maxShots, 10),
+            totalShots: parseInt(totalShots, 10),
+            shotsDistribution,
+            truePairsMatrix,
+        };
+        onUpdateGame(index, updatedGame);
+        handleNextStep();
+        setErrorMessages([]); // Clear errors on success
     };
+    
 
     // Function to handle starting shooting
     const handleStartShooting = () => {
@@ -259,29 +263,15 @@ const GameDetails = ({ games, onUpdateGame }) => {
                 )}
             </div>
 
-            {/* <div className="buttons-container">
-                <button
-                    type="button"
-                    onClick={handleStartShooting}
-                    className={`start-shooting-button ${!validateForm() ? 'disabled' : ''}`}
-                    disabled={!validateForm()}
-                >
-                    Start Shooting
-                </button>
-                <button
-                    type="button"
-                    onClick={() => navigate('/')}
-                    className="back-button"
-                >
-                    Back to Game List
-                </button>
-            </div> */}
 
             <div className="error-messages">
                 <ul>
-                    {/* Display error messages here */}
+                    {errorMessages.map((error, index) => (
+                        <li key={index}>{error}</li>
+                    ))}
                 </ul>
             </div>
+
 
         </div>
     );
