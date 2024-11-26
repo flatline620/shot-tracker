@@ -2,47 +2,43 @@
 .game-details {
   padding: 20px;
   text-align: left; /* Align text to the left */
+  max-width: var(--max-width); /* Optional: Set a max-width to control form width */
 }
 
-.game-form {
-  display: flex;
-  flex-direction: column; /* Stack rows vertically */
-  gap: 10px; /* Space between rows */
-  max-width: 400px; /* Optional: Set a max-width to control form width */
-}
-
-
-
-.form-row {
-  display: flex;
-  align-items: center; /* Align items vertically centered */
-  gap: 10px; /* Space between label and input */
-}
-
-.game-form label {
-  flex: 1; /* Take up available space */
-  font-weight: bold;
-  margin: 0; /* Remove default margin */
-}
-
-.game-form input {
-  width: 80px; /* Width adjusted for thin inputs */
-  padding: 5px;
-  border: 1px solid #ccc; /* Default border color */
-}
-
-.game-form input.invalid {
-  border: 1px solid red; /* Red border for invalid inputs */
-}
-
-.shooters-section {
-  margin-bottom: 20px;
-}
-
+/* BUTTONS */
 .buttons-container {
   display: flex;
   gap: 20px; /* Space between buttons */
   justify-content: flex-start; /* Align buttons to the left */
+  max-width: var(--max-width); /* Optional: Set a max-width to control form width */
+  width: 100%; /* Ensures container can stretch within its parent */
+}
+
+.back-button, .confirm-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+  flex-grow: 1; /* Allow buttons to grow evenly */
+}
+
+.back-button {
+  background-color: lightgrey;
+  color: black;
+}
+
+.back-button:hover {
+  background-color: #8E8E8E; /* Darker gray */
+}
+
+.confirm-button {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+.confirm-button:hover {
+  background-color: #45A049; /* Darker green */
 }
 
 .start-shooting-button {
@@ -60,14 +56,38 @@
   cursor: not-allowed;
 }
 
-.back-button {
-  background-color: lightgrey;
-  color: black;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  font-size: 18px;
-  cursor: pointer;
+
+
+
+
+/* FORMS */
+.game-form {
+  display: flex;
+  flex-direction: column; /* Stack rows vertically */
+  gap: 10px; /* Space between rows */
+  max-width: 400px; /* Optional: Set a max-width to control form width */
+}
+
+.form-row {
+  display: flex;
+  align-items: center; /* Align items vertically centered */
+  gap: 10px; /* Space between label and input */
+}
+
+.game-form label {
+  flex: 1; /* Take up available space */
+  font-weight: bold;
+  margin: 0; /* Remove default margin */
+}
+
+.game-form input {
+  width: 200px; /* Width adjusted for thin inputs */
+  padding: 5px;
+  border: 1px solid #ccc; /* Default border color */
+}
+
+.game-form input.invalid {
+  border: 1px solid red; /* Red border for invalid inputs */
 }
 
 .error-messages {
@@ -92,122 +112,4 @@
   margin-bottom: 10px;
 }
 
-.confirm-button {
-  background-color: #4CAF50; /* Green */
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
 
-.confirm-button:hover {
-  background-color: #45a049; /* Darker green */
-}
-
-/* Container for the True Pairs section */
-.true-pairs-container {
-  display: flex;
-  align-items: flex-start; /* Align items at the start (top) */
-  gap: 15px; /* Space between label and radio group */
-  margin-top: 10px; /* Space above the True Pairs section */
-}
-
-/* Style for the label */
-.true-pairs-label {
-  margin: 0; /* Remove default margin */
-  line-height: 1.5; /* Adjust line height for vertical alignment */
-  flex-shrink: 0; /* Prevent label from shrinking */
-  width: 150px; /* Ensure label has enough width for alignment */
-  /* Adjust positioning to align with the form inputs */
-  padding-left: 0px; /* Adjust this value to move the radio buttons to the right */
-}
-
-/* Container for the radio options */
-.radio-group {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Individual radio option items */
-.radio-item {
-  display: flex;
-  align-items: center; /* Align radio button and label vertically */
-  margin-bottom: 5px; /* Space between radio items */
-  /* Adjust margin to align with the form inputs */
-  padding-left: 135px; /* Align with the padding-left of .true-pairs-label */
-}
-
-/* Style for the radio button */
-.radio-item input[type="radio"] {
-  margin-right: 10px; /* Space between radio button and label */
-}
-
-/* Style for the radio label */
-.radio-item label {
-  margin: 0; /* Remove default margin */
-}
-
-.shooters-section {
-  margin-bottom: 20px;
-}
-
-.shooters-section ul {
-  list-style-type: none; /* Remove default list styles */
-  padding: 0; /* Remove default padding */
-  margin: 0; /* Remove default margin */
-}
-
-.shooters-section li {
-  display: flex;
-  align-items: center; /* Center items vertically */
-  gap: 10px; /* Space between shooter name and button */
-  padding: 5px 0; /* Space above and below each list item */
-  border-bottom: 1px solid #ccc; /* Optional: Border to separate items */
-}
-
-.shooters-section .name-column {
-  width: 200px; /* Fixed width for the name column */
-  overflow: hidden; /* Hide overflow text if it exceeds the column width */
-  text-overflow: ellipsis; /* Add ellipsis if text is too long */
-}
-
-.shooters-section .remove-button {
-  margin-left: 100px; /* Margin to align with input fields */
-  padding: 5px 10px; /* Adjust padding for consistency */
-  border: none;
-  background-color: red; /* Button color */
-  color: white;
-  cursor: pointer;
-}
-
-.shooters-section .remove-button:hover {
-  background-color: darkred; /* Darker color on hover */
-}
-
-/* Style for the Add Shooter button to align with the input boxes */
-.input-row {
-  display: flex;
-  align-items: center; /* Center items vertically */
-  gap: 10px; /* Space between input and button */
-}
-
-.input-row input {
-  width: 200px; /* Align with the name column width */
-  padding: 5px;
-  border: 1px solid #ccc; /* Default border color */
-}
-
-.input-row button {
-  padding: 5px 10px; /* Consistent padding with inputs */
-  border: none;
-  background-color: blue; /* Button color */
-  color: white;
-  cursor: pointer;
-  margin-left: 90px;
-}
-
-.input-row button.disabled {
-  background-color: grey;
-  cursor: not-allowed;
-}

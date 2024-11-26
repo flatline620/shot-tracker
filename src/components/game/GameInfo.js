@@ -1,4 +1,5 @@
 import React from 'react';
+import './css/GameInfo.css'; // Ensure the correct path to the CSS file
 
 const GameInfo = ({ numStations, setNumStations, minShots, setMinShots, maxShots, setMaxShots, totalShots, setTotalShots, truePairsOption, setTruePairsOption }) => { 
 

@@ -1,0 +1,69 @@
+.shooters-section {
+    margin-bottom: 20px;
+  }
+  
+  .shooters-section ul {
+    list-style-type: none; /* Remove default list styles */
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
+  }
+  
+  .shooters-section li {
+    display: flex;
+    align-items: center; /* Center items vertically */
+    gap: 10px; /* Space between shooter name and button */
+    padding: 5px 0; /* Space above and below each list item */
+    border-bottom: 1px solid #ccc; /* Optional: Border to separate items */
+  }
+  
+  .shooters-section .name-column {
+    width: 200px; /* Fixed width for the name column */
+    overflow: hidden; /* Hide overflow text if it exceeds the column width */
+    text-overflow: ellipsis; /* Add ellipsis if text is too long */
+  }
+  
+  .shooters-section .remove-button {
+    margin-left: 100px; /* Margin to align with input fields */
+    padding: 5px 10px; /* Adjust padding for consistency */
+    border: none;
+    background-color: red; /* Button color */
+    color: white;
+    cursor: pointer;
+  }
+  
+  .shooters-section .remove-button:hover {
+    background-color: darkred; /* Darker color on hover */
+  }
+
+  /* .rotate-shooters-container {
+
+  } */
+  
+  /* Style for the Add Shooter button to align with the input boxes */
+.input-row {
+    display: flex;
+    align-items: center; /* Center items vertically */
+    gap: 10px; /* Space between input and button */
+  }
+  
+  .input-row input {
+    width: 200px; /* Align with the name column width */
+    padding: 5px;
+    border: 1px solid #ccc; /* Default border color */
+    flex-grow: 1; /* Allow buttons to grow evenly */
+  }
+  
+  .input-row button {
+    padding: 5px 10px; /* Consistent padding with inputs */
+    border: none;
+    background-color: blue; /* Button color */
+    color: white;
+    cursor: pointer;
+    margin-left: 50px;
+    flex-grow: 1; /* Allow buttons to grow evenly */
+  }
+  
+  .input-row button.disabled {
+    background-color: grey;
+    cursor: not-allowed;
+  }

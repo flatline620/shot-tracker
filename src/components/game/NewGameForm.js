@@ -1,56 +1,60 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './css/NewGameForm.css';
+import React from 'react';
+//import './css/NewGameForm.css';
 
-const NewGameForm = ({ onAddGame }) => {
-  const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [date, setDate] = useState('');
-  const [location, setLocation] = useState('');
+const NewGameForm = ({ name, setName, location, setLocation, date, setDate }) => {
+  // const [name, setName] = useState('');
+  // const [date, setDate] = useState('');
+  // const [location, setLocation] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newGame = {
-      name,
-      date,
-      location,
-    };
-    const newIndex = onAddGame(newGame);
-    navigate(`/game/${newIndex}`);
-  };
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   const newGame = {
+  //     name,
+  //     date,
+  //     location,
+  //   };
+
+  //   onAddGame(newGame);
+  // };
+
+
 
   return (
     <div>
-      <h1>Add New Game</h1>
-      <form onSubmit={handleSubmit} className="new-game-form">
-        <label>
-          Name:
+      <h1>New Game</h1>
+      <form className="game-form">
+        <div className="form-row">
+          <label htmlFor="name">Name:</label>
           <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={(name && name.trim() === '') ? 'invalid' : ''}
           />
-        </label>
-        <label>
-          Date:
+        </div>
+
+        <div className="form-row">
+          <label htmlFor="location">Location:</label>
           <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
+              id="location"
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className={(location && location.trim() === '') ? 'invalid' : ''}
           />
-        </label>
-        <label>
-          Location:
+        </div>
+        
+        <div className="form-row">
+          <label htmlFor="date">Date:</label>
           <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            required
+              id="date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={(date && date.trim() === '') ? 'invalid' : ''}
           />
-        </label>
-        <button type="submit">Add Game</button>
+        </div>
       </form>
     </div>
   );

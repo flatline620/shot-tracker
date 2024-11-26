@@ -1,4 +1,5 @@
 import React from 'react';
+import './css/ShooterInfo.css'; // Ensure the correct path to the CSS file
 
 const ShooterInfo = ({ shooters, newShooter, setNewShooter, handleAddShooter, handleRemoveShooter, rotateShooters, setRotateShooters }) => { 
    // Check if the add shooter input should be marked as invalid

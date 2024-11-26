@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import GameGrid from './components/game/GameGrid';
 import NewGameForm from './components/game/NewGameForm';
 import GameDetails from './components/game/GameDetails';
 import SetupShooters from './components/game/SetupShooters';
@@ -10,10 +9,18 @@ import './App.css';
 
 const App = () => {
   const [games, setGames] = useState([
-    { name: "Steak and Clays", date: new Date().toISOString().split('T')[0], location: "TBSC", numStations: 7, minShots: 4, maxShots: 8, totalShots: 50, shooters: [{name: 'Sam', shotsTaken: 0, numHits: 0, maxScore: 0}, {name: 'Laura', shotsTaken: 0, numHits: 0, maxScore: 0}, {name: 'Rob', shotsTaken: 0, numHits: 0, maxScore: 0}] },
+    //{ name: "Steak and Clays", date: new Date().toISOString().split('T')[0], location: "TBSC", numStations: 7, minShots: 4, maxShots: 8, totalShots: 50, shooters: [{name: 'Sam', shotsTaken: 0, numHits: 0, maxScore: 0}, {name: 'Laura', shotsTaken: 0, numHits: 0, maxScore: 0}, {name: 'Rob', shotsTaken: 0, numHits: 0, maxScore: 0}] },
   ]);
 
   const handleAddGame = (newGame) => {
+    newGame = {...newGame, 
+        numStations: 7,
+        minShots: 4,
+        maxShots: 8,
+        totalShots: 50,
+        shooters: []
+    };
+    
     const newIndex = games.length;
     setGames((prevGames) => {
       const updatedGames = [...prevGames, newGame];
@@ -41,9 +48,9 @@ const App = () => {
   return (
     <Router basename="/shot-tracker">
       <Routes>
-        <Route path="/" element={<GameGrid games={games} />} />
+        <Route path="/" element={<GameDetails games={games} onAddGame={handleAddGame} onUpdateGame={handleUpdateGame} />} />
         <Route path="/new" element={<NewGameForm onAddGame={handleAddGame} />} />
-        <Route path="/game/:id" element={<GameDetails games={games} onUpdateGame={handleUpdateGame} />} />
+        <Route path="/game/:id" element={<GameDetails games={games} onAddGame={handleAddGame} onUpdateGame={handleUpdateGame} />} />
         <Route path="/setup-shooters" element={<SetupShooters />} />
         <Route path="/scoreboard" element={<Scoreboard />} />
         <Route path="/record-shots" element={<RecordShots />} />

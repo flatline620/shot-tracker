@@ -15,3 +15,7 @@ body {
     font-size: 18px;
   }
 }
+
+:root {
+  --max-width: 400px; /* Define the max-width value as a CSS variable */
+}
