@@ -21,12 +21,6 @@ const Scoreboard = () => {
 
   const { shooters, shotsDistribution, stationNames, truePairsMatrix } = game;
 
-  const getStationsShotAt = (shooter) => {
-    const shots = shooter.shots || [];
-    const uniqueStations = new Set(shots.map(shot => shot.station));
-    return uniqueStations.size;
-  };
-
   const handleRecordShots = (shooter) => {
     navigate('/record-shots', { state: { game, shooter } });
   };
@@ -41,17 +35,25 @@ const Scoreboard = () => {
     return shotsRemaining <= 0;
   });
 
-  // Determine the highest score possible
-  const highestScore = allShootersFinished
-    ? Math.max(...shooters.map(shooter => {
-        const numHits = shooter.numHits || 0;
-        const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
-          const shotsTakenByStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1).length;
-          return acc + Math.max(shotsAtStation - shotsTakenByStation, 0);
-        }, 0);
-        return numHits + shotsRemaining;
-      }))
-    : null;
+ // Determine the highest score possible
+ const highestScore = allShootersFinished
+ ? Math.max(...shooters.map(shooter => {
+     const numHits = shooter.numHits || 0;
+     const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
+       const shotsTakenByStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1).length;
+       return acc + Math.max(shotsAtStation - shotsTakenByStation, 0);
+     }, 0);
+     return numHits + shotsRemaining;
+   }))
+ : null;
+ 
+ // Handle confirmation before ending the game
+  const handleEndGame = () => {
+    const isConfirmed = window.confirm("Are you sure you want to end the game?");
+    if (isConfirmed) {
+      navigate('/'); // Navigate to the home page or any other route you need
+    }
+  };
 
   // Helper function to pad text to a fixed width with extra space
   const padText = (text, width) => {
@@ -178,9 +180,8 @@ const Scoreboard = () => {
               >
                   Cancel
               </button>
-          </div>
-        </>
-
+            </div>
+          </>
         ) : (
           <>
             <h1>Scoreboard</h1>
@@ -188,13 +189,9 @@ const Scoreboard = () => {
               <thead>
                 <tr>
                   <th>Shooter</th>
-                  <th>Stations Shot</th>
-                  <th>Shots Taken</th>
                   <th>Num Hits</th>
-                  <th>Shots Remaining</th>
-                  <th>Max Score Possible</th>
-                  <th>Current Streak</th>
-                  <th>Longest Streak</th>
+                  <th>Max Score</th>
+                  <th>Current / Longest Streak</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -219,13 +216,9 @@ const Scoreboard = () => {
                       style={{ backgroundColor: isTopScore ? 'gold' : (isCurrentShooter && !allShootersFinished ? 'lightgreen' : 'white') }}
                     >
                       <td style={{ fontStyle: isCurrentShooter && !allShootersFinished ? 'italic' : 'normal' }}>{shooter.name}</td>
-                      <td>{getStationsShotAt(shooter)}</td>
-                      <td>{totalShots}</td>
-                      <td>{numHits}</td>
-                      <td>{shotsRemaining}</td>
+                      <td>{numHits} / {totalShots}</td>
                       <td>{maxScorePossible}</td>
-                      <td>{shooter.currentStreak || 0}</td>
-                      <td>{shooter.maxStreak || 0}</td>
+                      <td>{shooter.currentStreak || 0} / {shooter.maxStreak || 0}</td>
                       <td>
                         <button 
                           onClick={() => handleRecordShots(shooter)} 
@@ -281,28 +274,25 @@ const Scoreboard = () => {
                 />
               )}
             </div>
-
-
           </>
         )}
-      </div>      
+      </div>
+
       {allShootersFinished ? (
-        <div className="action-buttons">
-          <button onClick={copyResults}>Copy Results</button>
-          <button onClick={handleCapture}>Copy Scoreboard</button>
-          <button onClick={() => navigate('/')}>End Game</button>
+        <div className="buttons-container">
+          <button onClick={copyResults} className="results-button">Copy Results</button>
+          <button onClick={handleCapture} className="scoreboard-button">Copy Scoreboard</button>
+          <button onClick={handleEndGame} className="end-button">End Game</button>
         </div>
       ) : (
         !isRenamingStations && (
-          <div className="action-buttons">
-            <button onClick={() => setIsRenamingStations(true)}>Rename Stations</button>
-            <button onClick={() => navigate('/')}>End Game</button>
+          <div className="buttons-container">
+            <button onClick={() => setIsRenamingStations(true)} className="rename-button">Rename Stations</button>
+            <button onClick={handleEndGame} className="end-button">End Game</button>
           </div>          
         )
-
       )}
     </div>
-
   );
 };
 

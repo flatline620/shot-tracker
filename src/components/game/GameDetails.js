@@ -316,9 +316,9 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                     <button 
                         type="button" 
                         onClick={handleStartShooting}
-                        className="confirm-button finish-button"
+                        className="confirm-button"
                     >
-                        Start Game
+                        PULL
                     </button>
                 )}
             </div>

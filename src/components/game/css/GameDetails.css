@@ -7,6 +7,7 @@
 
 /* BUTTONS */
 .buttons-container {
+  margin-top: 20px;
   display: flex;
   gap: 20px; /* Space between buttons */
   justify-content: flex-start; /* Align buttons to the left */
