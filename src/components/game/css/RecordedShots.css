@@ -1,0 +1,82 @@
+.recorded-shots-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .recorded-shots-grid {
+    display: grid;
+    gap: 5px;
+    grid-template-columns: repeat(8, 40px); /* Default: 6 columns per row */
+    grid-auto-rows: 40px; /* Keep rows consistent */
+    border: 2px solid #ccc; /* Add a border around the entire grid */
+    border-radius: 5px; /* Optional: to round the corners of the grid */
+    padding: 4px;
+  }
+
+  @media (max-width: 675px) {
+    .recorded-shots-grid {
+      grid-template-columns: repeat(6, 40px); /* 4 columns for medium screens */
+    }
+  }
+  
+  @media (max-width: 575px) {
+    .recorded-shots-grid {
+      grid-template-columns: repeat(4, 40px); /* 3 columns for smaller screens */
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  .recorded-shots-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .recorded-shots-station-name {
+    width: 120px; /* Adjust width as needed */
+    text-align: right;
+    margin-right: 10px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .recorded-shots-station-grid {
+    display: grid;
+    gap: 5px;
+  }
+
+  .recorded-shots-shot {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 5px;
+    cursor: default;
+    position: relative;
+    display: flex;    
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .recorded-shots-shot.hit {
+    background-color: green;
+    color: white;
+  }
+  
+  .recorded-shots-shot.miss {
+    background-color: red;
+    color: white;
+  }
+  
+  .recorded-shots-shot.empty {
+    background-color: lightgrey;
+  }

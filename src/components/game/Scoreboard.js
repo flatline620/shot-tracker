@@ -190,7 +190,7 @@ const Scoreboard = () => {
           </>
         ) : (
           <>
-            <h1>Scoreboard - Width: {screenWidth}px</h1>
+            <h1>Scoreboard</h1>
             <table>
               <thead>
                 <tr>
@@ -242,7 +242,7 @@ const Scoreboard = () => {
                         renderStationGrid={(stationIndex) => {
                           const shotsForStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1);
                           return (
-                            <div>
+                            <>
                               {shotsForStation.map((shot, shotIndex) => (
                                 <div key={shotIndex} className={`shot ${shot.hit ? 'hit' : 'miss'}`}>
                                   {truePairsMatrix[stationIndex]?.[shotIndex] ? (
@@ -250,7 +250,7 @@ const Scoreboard = () => {
                                   ) : ''}
                                 </div>
                               ))}
-                            </div>
+                            </>
                           );
                         }}
                       />

@@ -17,11 +17,26 @@
   font-weight: bold;
 }
 
-.station-grid {
+.generic-scorecard-station-grid {
   display: grid;
   gap: 5px;
-  grid-template-columns: repeat(8, 40px); /* Default: 6 columns per row */
+  grid-template-columns: repeat(8, 40px); /* Default: 8 columns per row */
   grid-auto-rows: 40px; /* Keep rows consistent */
+  border: 2px solid #ccc; /* Add a border around the entire grid */
+  border-radius: 5px; /* Optional: to round the corners of the grid */
+  padding: 4px;
+}
+
+@media (max-width: 675px) {
+  .generic-scorecard-station-grid {
+    grid-template-columns: repeat(6, 40px); /* 4 columns for medium screens */
+  }
+}
+
+@media (max-width: 575px) {
+  .generic-scorecard-station-grid {
+    grid-template-columns: repeat(4, 40px); /* 3 columns for smaller screens */
+  }
 }
 
 .shot-placeholder {
@@ -40,19 +55,4 @@
 .true-pair {
   background-color: #d0d0d0; /* Slightly darker grey for TP */
   color: #333;
-}
-
-/* Responsive design */
-
-
-@media (max-width: 675px) {
-  .station-grid {
-    grid-template-columns: repeat(6, 40px); /* 4 columns for medium screens */
-  }
-}
-
-@media (max-width: 575px) {
-  .station-grid {
-    grid-template-columns: repeat(4, 40px); /* 3 columns for smaller screens */
-  }
 }

@@ -9,6 +9,13 @@
 }
 
 .button-container {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Space between buttons */
+}
+
+.record-cancel-button-container {
   margin: 20px 0;
   display: flex;
   justify-content: center;
@@ -41,10 +48,29 @@
   color: white;
 }
 
-.station-grid {
+.record-shots-station-grid {
   display: grid;
   gap: 5px;
+  grid-template-columns: repeat(12, 40px); /* Default: 6 columns per row */
+  grid-auto-rows: 40px; /* Keep rows consistent */
 }
+
+@media (max-width: 675px) {
+  .record-shots-station-grid {
+    grid-template-columns: repeat(6, 40px); /* 4 columns for medium screens */
+  }
+}
+
+@media (max-width: 575px) {
+  .record-shots-station-grid {
+    grid-template-columns: repeat(4, 40px); /* 3 columns for smaller screens */
+  }
+}
+
+
+
+
+
 
 .shot {
   width: 40px;
@@ -103,11 +129,10 @@
 
 /* Centering the Current Station Preview */
 .selected-station-preview {
-  margin-top: 20px; /* Space above the preview */
   text-align: center;
 }
 
-.selected-station-preview .station-grid {
+.selected-station-preview .record-shots-station-grid {
   display: grid;
   gap: 5px;
   justify-content: center; /* Center the grid horizontally */

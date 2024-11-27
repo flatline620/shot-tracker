@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './css/RecordShots.css'; 
-import StationGrid from './StationGrid'; // Adjust the path as necessary
+import RecordedShots from './RecordedShots'; // Adjust the path as necessary
 
 const RecordShots = () => {
   const location = useLocation();
@@ -185,7 +185,7 @@ const RecordShots = () => {
   const renderStationGrid = (stationIndex) => {
     const shotsForStation = shotsByStation[stationIndex];
     return (
-      <div className="station-grid" style={{ gridTemplateColumns: `repeat(${initialShots[stationIndex]}, 40px)` }}>
+      <div className="record-shots-station-grid">
         {Array.from({ length: initialShots[stationIndex] }).map((_, shotIndex) => {
           const shot = shotsForStation.find(s => s.shotIndex === shotIndex);
           const isTruePair = truePairsMatrix[stationIndex][shotIndex] || false;
@@ -251,7 +251,7 @@ const RecordShots = () => {
         <h2>Current Station Preview</h2>
         {renderStationGrid(currentStation - 1)}
       </div>
-      <div className="button-container">
+      <div className="record-cancel-button-container">
         <button className="record-button" onClick={handleRecordShots}>
           Record Shots
         </button>
@@ -260,11 +260,11 @@ const RecordShots = () => {
         </button>
       </div>
       <h2>Recorded Shots</h2>
-      <StationGrid
+      <RecordedShots
         stationShots={shotsByStation}
         stationNames={stationNames}
         initialShots={initialShots}
-        renderStationGrid={renderStationGrid}
+        truePairsMatrix={truePairsMatrix}
       />
 
     </div>

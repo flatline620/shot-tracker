@@ -10,7 +10,7 @@ const GenericScorecard = ({ shotsDistribution, stationNames, truePairsMatrix }) 
           <div className="station-name">
             {stationNames[stationIndex] || `Station ${stationIndex + 1}`}
           </div>
-          <div className="station-grid">
+          <div className="generic-scorecard-station-grid">
             {Array.from({ length: shotsAtStation }).map((_, shotIndex) => {
               const isTruePair = truePairsMatrix[stationIndex]?.[shotIndex] || false;
               return (

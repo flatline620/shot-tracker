@@ -7,10 +7,7 @@ const StationGrid = ({ stationShots, stationNames, initialShots, renderStationGr
       {stationNames.map((stationName, stationIndex) => (
         <div key={stationIndex} className="station-row">
           <div className="station-name">{stationName}</div>
-          <div
-            className="station-grid"
-            style={{ gridTemplateColumns: `repeat(${initialShots[stationIndex]}, 40px)` }}
-          >
+          <div className="station-grid">
             {renderStationGrid(stationIndex)}
           </div>
         </div>
