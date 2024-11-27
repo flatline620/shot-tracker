@@ -60,40 +60,39 @@ const GameInfo = ({ numStations, setNumStations, minShots, setMinShots, maxShots
 
             <div className="true-pairs-container">
                 <label className="true-pairs-label">True Pairs:</label>
-                <div className="radio-group">
-                    <div className="radio-item">
-                        <input
-                            type="radio"
-                            id="truePairsAll"
-                            name="truePairs"
-                            value="All"
-                            checked={truePairsOption === 'All'}
-                            onChange={(e) => setTruePairsOption(e.target.value)}
-                        />
-                        <label htmlFor="truePairsAll">All</label>
-                    </div>
-                    <div className="radio-item">
-                        <input
-                            type="radio"
-                            id="truePairsRandom"
-                            name="truePairs"
-                            value="Random"
-                            checked={truePairsOption === 'Random'}
-                            onChange={(e) => setTruePairsOption(e.target.value)}
-                        />
-                        <label htmlFor="truePairsRandom">Random</label>
-                    </div>
-                    <div className="radio-item">
-                        <input
-                            type="radio"
-                            id="truePairsNone"
-                            name="truePairs"
-                            value="None"
-                            checked={truePairsOption === 'None'}
-                            onChange={(e) => setTruePairsOption(e.target.value)}
-                        />
-                        <label htmlFor="truePairsNone">None</label>
-                    </div>
+                <div className="toggle-group">
+                    <input
+                        type="radio"
+                        id="truePairsAll"
+                        name="truePairs"
+                        value="All"
+                        checked={truePairsOption === 'All'}
+                        onChange={(e) => setTruePairsOption(e.target.value)}
+                        className="toggle-button"
+                    />
+                    <label htmlFor="truePairsAll" className={`toggle-button-label ${truePairsOption === 'All' ? 'active' : ''}`}>All</label>
+
+                    <input
+                        type="radio"
+                        id="truePairsRandom"
+                        name="truePairs"
+                        value="Random"
+                        checked={truePairsOption === 'Random'}
+                        onChange={(e) => setTruePairsOption(e.target.value)}
+                        className="toggle-button"
+                    />
+                    <label htmlFor="truePairsRandom" className={`toggle-button-label ${truePairsOption === 'Random' ? 'active' : ''}`}>Random</label>
+
+                    <input
+                        type="radio"
+                        id="truePairsNone"
+                        name="truePairs"
+                        value="None"
+                        checked={truePairsOption === 'None'}
+                        onChange={(e) => setTruePairsOption(e.target.value)}
+                        className="toggle-button"
+                    />
+                    <label htmlFor="truePairsNone" className={`toggle-button-label ${truePairsOption === 'None' ? 'active' : ''}`}>None</label>
                 </div>
             </div>
 

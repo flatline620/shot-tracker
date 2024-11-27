@@ -24,7 +24,7 @@ const NewGameForm = ({ name, setName, location, setLocation, date, setDate }) =>
       <h1>New Game</h1>
       <form className="game-form">
         <div className="form-row">
-          <label htmlFor="name">Name:</label>
+          <label htmlFor="name">Names:</label>
           <input
               id="name"
               type="text"

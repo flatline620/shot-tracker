@@ -1,43 +1,87 @@
 /* Container for the True Pairs section */
 .true-pairs-container {
-    display: flex;
-    align-items: flex-start; /* Align items at the start (top) */
-    gap: 15px; /* Space between label and radio group */
-    margin-top: 10px; /* Space above the True Pairs section */
+  display: flex;
+  flex-direction: column; /* Stack the label and toggle buttons vertically */
+  gap: 15px; /* Space between the label and the toggle group */
+  margin-top: 30px;
+}
+
+/* Style for the label */
+.true-pairs-label {
+  font-weight: bold;
+  margin: 0;
+  line-height: 1.5;
+  flex-shrink: 0;
+  width: auto; /* Let label take only necessary space */
+}
+
+/* Container for the toggle buttons */
+.toggle-group {
+  display: flex;
+  justify-content: space-evenly; /* Evenly space the buttons */
+  width: 100%; /* Take full width of parent container */
+  max-width: 400px; /* Maximum width for the toggle group */
+}
+
+/* Hide the native radio buttons */
+.toggle-button {
+  display: none;
+}
+
+/* Style for the toggle button labels */
+.toggle-button-label {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 25px; /* Rounded corners */
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s, color 0.3s;
+  width: 100%; /* Ensure buttons fill available space evenly */
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Active state for the selected button */
+.toggle-button-label.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* Hover state for toggle buttons */
+.toggle-button-label:hover {
+  background-color: #ddd;
+}
+
+/* Adjust padding when active */
+.toggle-button-label.active:hover {
+  background-color: #0056b3;
+}
+
+/* To ensure even spacing between buttons without individual borders */
+.toggle-group .toggle-button-label {
+  flex: 1;
+  margin: 0 5px; /* Small space between the buttons */
+}
+
+/* When only one button is selected, it should look like one cohesive segment */
+.toggle-group .toggle-button-label:first-child {
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+}
+
+.toggle-group .toggle-button-label:last-child {
+  border-top-right-radius: 25px;
+  border-bottom-right-radius: 25px;
+}
+
+/* For medium screens and smaller */
+@media (max-width: 768px) {
+  .toggle-group {
+      max-width: 100%; /* Allow full width on smaller screens */
   }
-  
-  /* Style for the label */
-  .true-pairs-label {
-    font-weight: bold;
-    margin: 0; /* Remove default margin */
-    line-height: 1.5; /* Adjust line height for vertical alignment */
-    flex-shrink: 0; /* Prevent label from shrinking */
-    width: 150px; /* Ensure label has enough width for alignment */
-    /* Adjust positioning to align with the form inputs */
-    padding-left: 0px; /* Adjust this value to move the radio buttons to the right */
-  }
-  
-/* Container for the radio options */
-.radio-group {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Individual radio option items */
-  .radio-item {
-    display: flex;
-    align-items: center; /* Align radio button and label vertically */
-    margin-bottom: 5px; /* Space between radio items */
-    /* Adjust margin to align with the form inputs */
-    padding-left: 135px; /* Align with the padding-left of .true-pairs-label */
-  }
-  
-  /* Style for the radio button */
-  .radio-item input[type="radio"] {
-    margin-right: 10px; /* Space between radio button and label */
-  }
-  
-  /* Style for the radio label */
-  .radio-item label {
-    margin: 0; /* Remove default margin */
-  }  
+}

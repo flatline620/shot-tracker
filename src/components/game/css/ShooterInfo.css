@@ -101,7 +101,7 @@
   }
   
   .input-row input {
-    width: 200px; /* Align with the name column width */
+    width: 150px; /* Align with the name column width */
     padding: 5px;
     border: 1px solid #ccc; /* Default border color */
     flex-grow: 1; /* Allow buttons to grow evenly */

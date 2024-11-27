@@ -1,9 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import GenericScorecard from './GenericScorecard';
-import StationNaming from './StationNaming'; // Import StationNaming
-import StationGrid from './StationGrid'; // Import StationGrid
+import StationNaming from './StationNaming'; 
+import StationGrid from './StationGrid';
 import './css/Scoreboard.css';
 
 const Scoreboard = () => {
@@ -11,9 +11,23 @@ const Scoreboard = () => {
   const navigate = useNavigate();
   const [isRenamingStations, setIsRenamingStations] = useState(false);
   const [localStationNames, setLocalStationNames] = useState(location.state?.game?.stationNames || []);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth); // State to track screen width
   const game = location.state?.game || { shooters: [] };
   const currentShooter = location.state?.currentShooter || (game.shooters.length > 0 ? game.shooters[0] : null);
   const screenshotRef = useRef(null); // Ref to capture the content
+
+  useEffect(() => {
+    // Update the screen width on window resize
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   if (!game || !game.shooters || !game.shotsDistribution || !game.stationNames || !game.truePairsMatrix) {
     return <div>No game data found.</div>;
@@ -25,7 +39,6 @@ const Scoreboard = () => {
     navigate('/record-shots', { state: { game, shooter } });
   };
 
-  // Check if all shooters have finished
   const allShootersFinished = shooters.every(shooter => {
     const shotsTakenByStation = shooter.shots || [];
     const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
@@ -35,25 +48,24 @@ const Scoreboard = () => {
     return shotsRemaining <= 0;
   });
 
- // Determine the highest score possible
- const highestScore = allShootersFinished
- ? Math.max(...shooters.map(shooter => {
-     const numHits = shooter.numHits || 0;
-     const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
-       const shotsTakenByStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1).length;
-       return acc + Math.max(shotsAtStation - shotsTakenByStation, 0);
-     }, 0);
-     return numHits + shotsRemaining;
-   }))
- : null;
- 
- // Handle confirmation before ending the game
+  const highestScore = allShootersFinished
+    ? Math.max(...shooters.map(shooter => {
+        const numHits = shooter.numHits || 0;
+        const shotsRemaining = shotsDistribution.reduce((acc, shotsAtStation, stationIndex) => {
+          const shotsTakenByStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1).length;
+          return acc + Math.max(shotsAtStation - shotsTakenByStation, 0);
+        }, 0);
+        return numHits + shotsRemaining;
+      }))
+    : null;
+
   const handleEndGame = () => {
     const isConfirmed = window.confirm("Are you sure you want to end the game?");
     if (isConfirmed) {
       navigate('/'); // Navigate to the home page or any other route you need
     }
   };
+
 
   // Helper function to pad text to a fixed width with extra space
   const padText = (text, width) => {
@@ -139,9 +151,7 @@ const Scoreboard = () => {
   const handleCapture = async () => {
     if (screenshotRef.current) {
       try {
-        // Capture the DOM element
         const canvas = await html2canvas(screenshotRef.current);
-        
         const dataURL = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = dataURL;
@@ -152,6 +162,15 @@ const Scoreboard = () => {
       }
     }
   };
+
+  // Column names for different screen sizes
+  const columnNames = screenWidth < 675 ? 
+    ['Shooter', 'Hits', 'Score', 'Streaks', 'Action'] : 
+    ['Shooter', 'Num Hits', 'Max Score', 'Current / Longest Streak', 'Action'];
+
+  // Button names for different screen sizes
+  const recordShotsName = screenWidth < 675 ? 
+    'Shots' : 'Record Shots';
 
   return (
     <div>
@@ -164,35 +183,20 @@ const Scoreboard = () => {
               onConfirm={handleConfirmStationNames}
               onCancel={handleCancelStationNaming}
             />
-
             <div className="buttons-container">
-              <button
-                  type="button"
-                  onClick={handleConfirmStationNames}
-                  className="confirm-button"
-              >
-                  Confirm
-              </button>
-              <button
-                  type="button"
-                  onClick={handleCancelStationNaming}
-                  className="back-button"
-              >
-                  Cancel
-              </button>
+              <button type="button" onClick={handleConfirmStationNames} className="confirm-button">Confirm</button>
+              <button type="button" onClick={handleCancelStationNaming} className="back-button">Cancel</button>
             </div>
           </>
         ) : (
           <>
-            <h1>Scoreboard</h1>
+            <h1>Scoreboard - Width: {screenWidth}px</h1>
             <table>
               <thead>
                 <tr>
-                  <th>Shooter</th>
-                  <th>Num Hits</th>
-                  <th>Max Score</th>
-                  <th>Current / Longest Streak</th>
-                  <th>Actions</th>
+                  {columnNames.map((colName, index) => (
+                    <th key={index}>{colName}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -211,21 +215,13 @@ const Scoreboard = () => {
                   const isTopScore = allShootersFinished && maxScorePossible === highestScore;
 
                   return (
-                    <tr 
-                      key={index} 
-                      style={{ backgroundColor: isTopScore ? 'gold' : (isCurrentShooter && !allShootersFinished ? 'lightgreen' : 'white') }}
-                    >
+                    <tr key={index} style={{ backgroundColor: isTopScore ? 'gold' : (isCurrentShooter && !allShootersFinished ? 'lightgreen' : 'white') }}>
                       <td style={{ fontStyle: isCurrentShooter && !allShootersFinished ? 'italic' : 'normal' }}>{shooter.name}</td>
                       <td>{numHits} / {totalShots}</td>
                       <td>{maxScorePossible}</td>
                       <td>{shooter.currentStreak || 0} / {shooter.maxStreak || 0}</td>
                       <td>
-                        <button 
-                          onClick={() => handleRecordShots(shooter)} 
-                          disabled={shotsRemaining <= 0}
-                        >
-                          Record Shots
-                        </button>
+                        <button onClick={() => handleRecordShots(shooter)} disabled={shotsRemaining <= 0}>{recordShotsName}</button>
                       </td>
                     </tr>
                   );
@@ -239,30 +235,25 @@ const Scoreboard = () => {
                   {shooters.map((shooter, index) => (
                     <div key={index} className="grid-item">
                       <h3>{shooter.name}</h3>
-                      <div className="station-grid-container">
-                        <StationGrid
-                          stationShots={shooter.shots || []}
-                          stationNames={stationNames}
-                          initialShots={shotsDistribution}
-                          renderStationGrid={(stationIndex) => {
-                            const shotsForStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1);
-                            return (
-                              <>
-                                {shotsForStation.map((shot, shotIndex) => (
-                                  <div
-                                    key={shotIndex}
-                                    className={`shot ${shot.hit ? 'hit' : 'miss'}`}
-                                  >
-                                    {truePairsMatrix[stationIndex]?.[shotIndex] ? (
-                                      <span className="tp-label">TP</span>
-                                    ) : ''}
-                                  </div>
-                                ))}
-                              </>
-                            );
-                          }}
-                        />
-                      </div>
+                      <StationGrid
+                        stationShots={shooter.shots || []}
+                        stationNames={stationNames}
+                        initialShots={shotsDistribution}
+                        renderStationGrid={(stationIndex) => {
+                          const shotsForStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1);
+                          return (
+                            <div>
+                              {shotsForStation.map((shot, shotIndex) => (
+                                <div key={shotIndex} className={`shot ${shot.hit ? 'hit' : 'miss'}`}>
+                                  {truePairsMatrix[stationIndex]?.[shotIndex] ? (
+                                    <span className="tp-label">TP</span>
+                                  ) : ''}
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        }}
+                      />
                     </div>
                   ))}
                 </div>
@@ -289,7 +280,7 @@ const Scoreboard = () => {
           <div className="buttons-container">
             <button onClick={() => setIsRenamingStations(true)} className="rename-button">Rename Stations</button>
             <button onClick={handleEndGame} className="end-button">End Game</button>
-          </div>          
+          </div>
         )
       )}
     </div>
