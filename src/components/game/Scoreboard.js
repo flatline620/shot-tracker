@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import html2canvas from 'html2canvas';
+// import html2canvas from 'html2canvas';
 import GenericScorecard from './GenericScorecard';
 import StationNaming from './StationNaming'; 
 import StationGrid from './StationGrid';
@@ -148,20 +148,20 @@ const Scoreboard = () => {
     setIsRenamingStations(false);
   };
 
-  const handleCapture = async () => {
-    if (screenshotRef.current) {
-      try {
-        const canvas = await html2canvas(screenshotRef.current);
-        const dataURL = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = dataURL;
-        link.download = 'screenshot.png';
-        link.click();
-      } catch (err) {
-        console.error('Failed to capture screenshot:', err);
-      }
-    }
-  };
+  // const handleCapture = async () => {
+  //   if (screenshotRef.current) {
+  //     try {
+  //       const canvas = await html2canvas(screenshotRef.current);
+  //       const dataURL = canvas.toDataURL('image/png');
+  //       const link = document.createElement('a');
+  //       link.href = dataURL;
+  //       link.download = 'screenshot.png';
+  //       link.click();
+  //     } catch (err) {
+  //       console.error('Failed to capture screenshot:', err);
+  //     }
+  //   }
+  // };
 
   // Column names for different screen sizes
   const columnNames = screenWidth < 675 ? 
