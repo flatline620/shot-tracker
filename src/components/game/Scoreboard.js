@@ -272,7 +272,7 @@ const Scoreboard = () => {
       {allShootersFinished ? (
         <div className="buttons-container">
           <button onClick={copyResults} className="results-button">Copy Results</button>
-          <button onClick={handleCapture} className="scoreboard-button">Copy Scoreboard</button>
+          {/* <button onClick={handleCapture} className="scoreboard-button">Copy Scoreboard</button> */}
           <button onClick={handleEndGame} className="end-button">End Game</button>
         </div>
       ) : (

@@ -29,7 +29,7 @@ const distributeShots = (numStations, minShotsPerStation, maxShotsPerStation, to
 };
 
 // Function to assign True Pairs as a matrix
-const generateTruePairsMatrix = (shots, truePairsOption) => {
+const generateTruePairsMatrix = (shots, truePairsOption, truePairWeighting) => {
     const truePairsMatrix = [];
 
     for (let i = 0; i < shots.length; i++) {
@@ -37,14 +37,14 @@ const generateTruePairsMatrix = (shots, truePairsOption) => {
         const truePairs = Array(numShots).fill(false); // Default all shots to not be True Pair
 
         // Randomly decide whether to assign True Pairs 50% of the time
-        const shouldAssignTruePairs = Math.random() < 0.5;
+        const shouldAssignTruePairs = Math.random() < (truePairWeighting / 100);
 
         if (truePairsOption === 'All') {
             // Set all shots as True Pairs
             truePairs.fill(true);
         } else if (truePairsOption === 'Random' && shouldAssignTruePairs) {
             // Assign True Pairs randomly
-            const numTruePairs = Math.floor(Math.random() * (Math.floor(numShots / 2) + 1)) * 2;
+            const numTruePairs = Math.max(2, Math.floor(Math.random() * (Math.floor(numShots / 2) + 1)) * 2);
             for (let j = numShots - numTruePairs; j < numShots; j++) {
                 truePairs[j] = true;
             }
@@ -78,6 +78,8 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
 
     // State for True Pairs option
     const [truePairsOption, setTruePairsOption] = useState('None');
+
+    const [truePairWeighting, setTruePairWeighting] = useState(50);
 
     // State for Rotate Shooters
     const [rotateShooters, setRotateShooters] = useState(true); // Default to true
@@ -180,7 +182,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             parseInt(totalShots, 10)
         );
     
-        const truePairsMatrix = generateTruePairsMatrix(shotsDistribution, truePairsOption);
+        const truePairsMatrix = generateTruePairsMatrix(shotsDistribution, truePairsOption, truePairWeighting);
     
         const updatedGame = {
             ...game,
@@ -277,6 +279,8 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                     setTotalShots={setTotalShots}
                     truePairsOption={truePairsOption}
                     setTruePairsOption={setTruePairsOption}
+                    truePairWeighting={truePairWeighting}
+                    setTruePairWeighting={setTruePairWeighting}
                 />
             )}
 
