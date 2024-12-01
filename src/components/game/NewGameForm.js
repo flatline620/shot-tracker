@@ -2,29 +2,12 @@ import React from 'react';
 //import './css/NewGameForm.css';
 
 const NewGameForm = ({ name, setName, location, setLocation, date, setDate }) => {
-  // const [name, setName] = useState('');
-  // const [date, setDate] = useState('');
-  // const [location, setLocation] = useState('');
-
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   const newGame = {
-  //     name,
-  //     date,
-  //     location,
-  //   };
-
-  //   onAddGame(newGame);
-  // };
-
-
-
   return (
     <div>
       <h1>New Game</h1>
       <form className="game-form">
         <div className="form-row">
-          <label htmlFor="name">Name:</label>
+          <label htmlFor="name">Game Name:</label>
           <input
               id="name"
               type="text"
