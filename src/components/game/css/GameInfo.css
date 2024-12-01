@@ -85,3 +85,14 @@
       max-width: 100%; /* Allow full width on smaller screens */
   }
 }
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none; /* Hides the spinner */
+  margin: 0;
+}
+
+/* Hide the spinner for Firefox */
+input[type="number"] {
+  -moz-appearance: textfield; /* Hides the spinner in Firefox */
+}

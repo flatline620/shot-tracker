@@ -13,59 +13,126 @@ const GameInfo = ({
   truePairsOption,
   setTruePairsOption,
   truePairWeighting,
-  setTruePairWeighting,
+  setTruePairWeighting
 }) => {
+  const handleNumStationsChange = (e) => {
+    setNumStations(e.target.value);
+    
+    validateTotalShots(e.target.value, minShots, maxShots);
+  };
+
+  const handleMinShotsChange = (e) => {
+    const value = Number(e.target.value);
+    
+    if ((value < 2) || (value > maxShots)) {
+      setMinShots(minShots);
+    } else {
+      setMinShots(value);
+      
+      validateTotalShots(numStations, value, maxShots);      
+    }
+  };
+
+  const handleMaxShotsChange = (e) => {
+    const value = Number(e.target.value);
+    
+    if ((value < 2) || (value < minShots)) {
+      setMaxShots(minShots);
+    } else {
+      setMaxShots(value);
+      
+      validateTotalShots(numStations, minShots, value);    
+    }
+  };
+
+  const handleTotalShotsChange = (e) => {
+    updateTotalShots(numStations, minShots, maxShots, Number(e.target.value));
+  };
+
+  function validateTotalShots(numberOfStations, minShotsPerStation, maxShotsPerStation) {
+    const totalMinShots = numberOfStations * minShotsPerStation;
+    const totalMaxShots = numberOfStations * maxShotsPerStation;
+
+    if (totalShots < totalMinShots) {
+      setTotalShots(totalMinShots);
+    } else if (totalShots > totalMaxShots) {
+      setTotalShots(totalMaxShots);
+    }
+  }
+
+  
+  function updateTotalShots(numberOfStations, minShotsPerStation, maxShotsPerStation, newTotalShots) {
+    const totalMinShots = numberOfStations * minShotsPerStation;
+    const totalMaxShots = numberOfStations * maxShotsPerStation;
+
+    if (newTotalShots < totalMinShots) {
+      setTotalShots(totalMinShots);
+    } else if (newTotalShots > totalMaxShots) {
+      setTotalShots(totalMaxShots);
+    } else {
+      setTotalShots(newTotalShots);
+    }
+
+  }
+
   return (
     <div>
       <h2>Game Info</h2>
 
       <form className="game-form">
-        <div className="form-row">
-          <label htmlFor="numStations">Number of Stations:</label>
-          <input
-            id="numStations"
-            type="number"
-            value={numStations}
-            onChange={(e) => setNumStations(e.target.value)}
-            className={numStations <= 0 ? 'invalid' : ''}
-            required
-          />
-        </div>
+      <div className="form-row">
+        <label htmlFor="numStations">Number of Stations:</label>
+        <input
+          id="numStations"
+          type="range"
+          min="1"
+          max="25"
+          value={numStations}
+          onChange={handleNumStationsChange}
+        />
+        <span>{numStations}</span>
+      </div>
 
         <div className="form-row">
           <label htmlFor="minShots">Min Shots per Station:</label>
           <input
             id="minShots"
-            type="number"
+            type="range"
+            min="2"
+            max="8"
+            step="2"
             value={minShots}
-            onChange={(e) => setMinShots(e.target.value)}
-            className={minShots <= 0 ? 'invalid' : ''}
-            required
+            onChange={handleMinShotsChange}
           />
+          <span>{minShots}</span>
         </div>
 
         <div className="form-row">
           <label htmlFor="maxShots">Max Shots per Station:</label>
           <input
             id="maxShots"
-            type="number"
+            type="range"
+            min="2"
+            max="8"
+            step="2"
             value={maxShots}
-            onChange={(e) => setMaxShots(e.target.value)}
-            className={maxShots <= 0 ? 'invalid' : ''}
-            required
+            onChange={handleMaxShotsChange}
           />
+          <span>{maxShots}</span>
         </div>
 
         <div className="form-row">
           <label htmlFor="totalShots">Total Shots:</label>
           <input
             id="totalShots"
-            type="number"
+            type="range"
+            min="2"
+            max="200"
+            step="2"
             value={totalShots}
-            onChange={(e) => setTotalShots(e.target.value)}
-            className={totalShots <= 0 ? 'invalid' : ''}
-            required
+            onChange={handleTotalShotsChange}
           />
+          <span>{totalShots}</span>
         </div>
       </form>
 

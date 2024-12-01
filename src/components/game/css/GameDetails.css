@@ -146,7 +146,7 @@
   border-radius: 8px;
   max-width: 365px; /* Limit the width of the modal to 400px */
   width: 100%; /* Allow modal to take up full width up to max-width */
-  text-align: left; /* Align text to the left */
+  text-align: center; /* Align text to the left */
   overflow-y: auto; /* Allow scrolling if content overflows */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -154,6 +154,14 @@
 /* Modal Title */
 .modal-content h2 {
   font-size: 20px;
+  margin-bottom: 20px;
+}
+
+/* Container for the course checkboxes - grid layout */
+.course-checkboxes-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);  /* Creates 2 equal columns */
+  gap: 20px;  /* Space between the columns and rows */
   margin-bottom: 20px;
 }
 

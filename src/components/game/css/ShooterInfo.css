@@ -29,6 +29,7 @@
     background-color: red; /* Button color */
     color: white;
     cursor: pointer;
+    width: 205px;
   }
   
   .shooters-section .remove-button:hover {

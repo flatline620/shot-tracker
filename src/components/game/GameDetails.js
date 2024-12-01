@@ -229,22 +229,6 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
         return finalStations;
     }
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     const validateForm = () => {
         const errors = [];
         if (currentStep === 0) {
@@ -452,20 +436,22 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                 <div className="modal">
                     <div className="modal-content">
                         <h2>Select Courses</h2>
-                        {Object.keys(selectedCourses).map((course) => (
-                            <div key={course} className="toggle-switch-container">
-                                <label htmlFor={course} className="switch">
-                                    <input
-                                        type="checkbox"
-                                        id={course}
-                                        checked={selectedCourses[course]}
-                                        onChange={() => handleCourseSelection(course)}
-                                    />
-                                    <span className="slider"></span>
-                                </label>
-                                <label htmlFor={course}>{course}</label>
-                            </div>
-                        ))}
+                        <div className="course-checkboxes-container">
+                            {Object.keys(selectedCourses).map((course) => (
+                                <div key={course} className="toggle-switch-container">
+                                    <label htmlFor={course} className="switch">
+                                        <input
+                                            type="checkbox"
+                                            id={course}
+                                            checked={selectedCourses[course]}
+                                            onChange={() => handleCourseSelection(course)}
+                                        />
+                                        <span className="slider"></span>
+                                    </label>
+                                    <label htmlFor={course}>{course}</label>
+                                </div>
+                            ))}
+                        </div>
                         <div className="assign-stations-button-container">
                             <button onClick={handleAssignStations} className="assign-stations-button">
                                 Assign Stations
@@ -474,6 +460,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                     </div>
                 </div>
             )}
+
 
 
             <div className="buttons-container">
