@@ -1,10 +1,15 @@
 import React from 'react';
-//import './css/NewGameForm.css';
+import { Link } from 'react-router-dom';
 
 const NewGameForm = ({ name, setName, location, setLocation, date, setDate }) => {
   return (
     <div>
-      <h1>New Game</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>New Games</h1>
+        <Link to="/help" style={{ textDecoration: 'none', fontSize: '20px' }}>
+          ❓
+        </Link>
+      </div>
       <form className="game-form">
         <div className="form-row">
           <label htmlFor="name">Game Name:</label>

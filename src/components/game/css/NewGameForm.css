@@ -1,0 +1,21 @@
+/* Style for the help button */
+.help-button {
+    padding: 5px; /* Small padding around the icon */
+    font-size: 20px; /* Size of the question mark */
+    background-color: #f0f0f0; /* Light gray background */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 5px; /* Round shape for the button */
+    cursor: pointer; /* Pointer cursor on hover */
+    display: inline-flex; /* Ensures the button shrinks to fit its content */
+    justify-content: center; /* Center the question mark horizontally */
+    align-items: center; /* Center the question mark vertically */
+    width: auto; /* Allow width to adjust based on content */
+    height: auto; /* Allow height to adjust based on content */
+    min-width: 30px; /* Minimum width to prevent it from being too small */
+    min-height: 30px; /* Minimum height to prevent it from being too small */
+  }
+  
+  .help-button:hover {
+    background-color: #e0e0e0; /* Slightly darker background on hover */
+  }
+  

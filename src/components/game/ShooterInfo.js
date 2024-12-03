@@ -27,7 +27,7 @@ const ShooterInfo = ({ shooters, newShooter, setNewShooter, handleAddShooter, ha
                     checked={rotateShooters}
                     onChange={(e) => setRotateShooters(e.target.checked)}
                 />
-                Rotate Shooters
+                Rotate First Shooter
                 {/* Info Icon */}
                 <span className="info-icon" onClick={handleInfoClick}>
                     ℹ️

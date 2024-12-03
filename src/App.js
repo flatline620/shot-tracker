@@ -5,6 +5,7 @@ import GameDetails from './components/game/GameDetails';
 import SetupShooters from './components/game/SetupShooters';
 import Scoreboard from './components/game/Scoreboard';
 import RecordShots from './components/game/RecordShots';
+import Help from './components/game/Help';
 import './App.css';
 
 const App = () => {
@@ -54,6 +55,7 @@ const App = () => {
         <Route path="/setup-shooters" element={<SetupShooters />} />
         <Route path="/scoreboard" element={<Scoreboard />} />
         <Route path="/record-shots" element={<RecordShots />} />
+        <Route path="/help" element={<Help />} />
       </Routes>
     </Router>
   );
