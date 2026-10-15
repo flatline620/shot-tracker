@@ -41,6 +41,11 @@ const RecordShots = () => {
     return shots.filter(s => s.station === currentStation);
   };
 
+  const areCurrentStationShotsComplete = () => {
+    const requiredShots = initialShots[currentStation - 1] || 0;
+    return requiredShots > 0 && calculateCurrentStationShots().length >= requiredShots;
+  };
+
   const recalculateStreak = useCallback(() => {
     let currentStreak = 0;
     let maxStreak = shooter.maxStreak || 0;
@@ -109,6 +114,8 @@ const RecordShots = () => {
   };
 
   const handleRecordShots = () => {
+    if (!areCurrentStationShotsComplete()) return;
+
     const { currentStreak, maxStreak } = recalculateStreak();
 
     const updatedShooters = game.shooters.map((s) =>
@@ -245,6 +252,7 @@ const RecordShots = () => {
         <button
           className="shot-button undo"
           onClick={handleUndoLastShot}
+          disabled={calculateCurrentStationShots().length === 0}
         >
           Undo
         </button>
@@ -254,7 +262,7 @@ const RecordShots = () => {
         {renderStationGrid(currentStation - 1)}
       </div>
       <div className="record-cancel-button-container">
-        <button className="record-button" onClick={handleRecordShots}>
+        <button className="record-button" onClick={handleRecordShots} disabled={!areCurrentStationShotsComplete()}>
           Record Shots
         </button>
         <button className="return-button" onClick={handleCancelShooter}>
