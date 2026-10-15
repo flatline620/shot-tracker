@@ -5,6 +5,7 @@ import GenericScorecard from './GenericScorecard';
 import StationNaming from './StationNaming'; 
 import StationGrid from './StationGrid';
 import './css/Scoreboard.css';
+import { clearSavedGameProgress } from './gameProgress';
 
 const Scoreboard = () => {
   const location = useLocation();
@@ -62,6 +63,7 @@ const Scoreboard = () => {
   const handleEndGame = () => {
     const isConfirmed = window.confirm("Are you sure you want to end the game?");
     if (isConfirmed) {
+      clearSavedGameProgress();
       navigate('/'); // Navigate to the home page or any other route you need
     }
   };

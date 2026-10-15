@@ -321,6 +321,8 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             totalShots: parseInt(totalShots, 10),
             shotsDistribution,
             truePairsMatrix,
+            truePairsOption,
+            truePairWeighting,
         };
         onUpdateGame(index, updatedGame);
         setGame(updatedGame);

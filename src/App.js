@@ -1,12 +1,40 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import NewGameForm from './components/game/NewGameForm';
 import GameDetails from './components/game/GameDetails';
 import SetupShooters from './components/game/SetupShooters';
 import Scoreboard from './components/game/Scoreboard';
 import RecordShots from './components/game/RecordShots';
 import Help from './components/game/Help';
+import { clearSavedGameProgress, getSavedGameProgress } from './components/game/gameProgress';
 import './App.css';
+
+const GameRecovery = () => {
+  const navigate = useNavigate();
+  const hasCheckedProgress = useRef(false);
+
+  useEffect(() => {
+    if (hasCheckedProgress.current) return;
+    hasCheckedProgress.current = true;
+
+    const savedProgress = getSavedGameProgress();
+    if (!savedProgress) return;
+
+    const { game, currentShooterIndex } = savedProgress;
+    const shouldResume = window.confirm(`Continue today's saved game "${game.name}"?`);
+
+    if (shouldResume) {
+      navigate('/scoreboard', {
+        state: { game, currentShooter: game.shooters[currentShooterIndex] },
+      });
+    } else {
+      clearSavedGameProgress();
+      navigate('/');
+    }
+  }, [navigate]);
+
+  return null;
+};
 
 const App = () => {
   const [games, setGames] = useState([
@@ -48,6 +76,7 @@ const App = () => {
 
   return (
     <Router basename="/shot-tracker">
+      <GameRecovery />
       <Routes>
         <Route path="/" element={<GameDetails games={games} onAddGame={handleAddGame} onUpdateGame={handleUpdateGame} />} />
         <Route path="/new" element={<NewGameForm onAddGame={handleAddGame} />} />

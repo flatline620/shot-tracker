@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './css/RecordShots.css'; 
 import RecordedShots from './RecordedShots'; // Adjust the path as necessary
+import { saveGameProgress } from './gameProgress';
 
 const RecordShots = () => {
   const location = useLocation();
@@ -128,6 +129,7 @@ const RecordShots = () => {
     const updatedGame = { ...game, shooters: updatedShooters, currentStation: findNextIncompleteStation(allShootersDone) };
 
     const nextShooterIndex = findNextShooter(allShootersDone);
+    saveGameProgress(updatedGame, nextShooterIndex);
     navigate('/scoreboard', { state: { game: updatedGame, currentShooter: updatedShooters[nextShooterIndex] } });
   };
 
