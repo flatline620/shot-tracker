@@ -87,6 +87,32 @@
     margin-bottom: 5px; /* Reduce the space between rows of StationGrid components */
   }
 
+  .station-progress {
+    display: inline-flex;
+    margin-left: 8px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .station-progress-not-started {
+    background-color: #e5e7eb;
+    color: #374151;
+  }
+
+  .station-progress-in-progress {
+    background-color: #fff0c2;
+    color: #705000;
+  }
+
+  .station-progress-complete {
+    background-color: #d9efdf;
+    color: #245b34;
+  }
+
   .shot {
     position: relative; /* Make the shot div a containing block for absolute positioning */
     width: 30px; /* Adjust as necessary */

@@ -49,6 +49,18 @@ const Scoreboard = () => {
     return shotsRemaining <= 0;
   });
 
+  const stationStatuses = shotsDistribution.map((requiredShots, stationIndex) => {
+    const shotsPerShooter = shooters.map(shooter =>
+      (shooter.shots || []).filter(shot => shot.station === stationIndex + 1).length
+    );
+    const noShotsRecorded = shotsPerShooter.every(shotsTaken => shotsTaken === 0);
+    const allShootersComplete = shotsPerShooter.every(shotsTaken => shotsTaken >= requiredShots);
+
+    if (noShotsRecorded) return { state: 'not-started', label: 'Not shot yet' };
+    if (allShootersComplete) return { state: 'complete', label: 'Complete' };
+    return { state: 'in-progress', label: 'In progress' };
+  });
+
   const highestScore = allShootersFinished
     ? Math.max(...shooters.map(shooter => {
         const numHits = shooter.numHits || 0;
@@ -241,6 +253,7 @@ const Scoreboard = () => {
                         stationShots={shooter.shots || []}
                         stationNames={stationNames}
                         initialShots={shotsDistribution}
+                        stationStatuses={stationStatuses}
                         renderStationGrid={(stationIndex) => {
                           const shotsForStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1);
                           return (
@@ -263,7 +276,8 @@ const Scoreboard = () => {
                 <GenericScorecard 
                   shotsDistribution={shotsDistribution} 
                   stationNames={stationNames}
-                  truePairsMatrix={truePairsMatrix} 
+                  truePairsMatrix={truePairsMatrix}
+                  stationStatuses={stationStatuses}
                 />
               )}
             </div>

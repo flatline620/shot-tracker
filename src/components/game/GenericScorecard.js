@@ -1,7 +1,7 @@
 import React from 'react';
 import './css/GenericScorecard.css'; // Import CSS
 
-const GenericScorecard = ({ shotsDistribution, stationNames, truePairsMatrix }) => {
+const GenericScorecard = ({ shotsDistribution, stationNames, truePairsMatrix, stationStatuses }) => {
   return (
     <div>
       <h2>Scorecard</h2>
@@ -9,6 +9,9 @@ const GenericScorecard = ({ shotsDistribution, stationNames, truePairsMatrix }) 
         <div key={stationIndex} className="station-row">
           <div className="station-name">
             {stationNames[stationIndex] || `Station ${stationIndex + 1}`}
+            <span className={`station-progress station-progress-${stationStatuses[stationIndex].state}`}>
+              {stationStatuses[stationIndex].label}
+            </span>
           </div>
           <div className="generic-scorecard-station-grid">
             {Array.from({ length: shotsAtStation }).map((_, shotIndex) => {
