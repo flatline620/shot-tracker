@@ -5,7 +5,7 @@ const NewGameForm = ({ name, setName, location, setLocation, date, setDate }) =>
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>New Games</h1>
+        <h1>New Game</h1>
         <Link to="/help" style={{ textDecoration: 'none', fontSize: '20px' }}>
           ❓
         </Link>
