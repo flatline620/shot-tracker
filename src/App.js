@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import NewGameForm from './components/game/NewGameForm';
 import GameDetails from './components/game/GameDetails';
 import SetupShooters from './components/game/SetupShooters';
@@ -32,6 +32,46 @@ const GameRecovery = () => {
       navigate('/');
     }
   }, [navigate]);
+
+  return null;
+};
+
+const GameNavigationWarning = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const navigationType = useNavigationType();
+  const previousLocation = useRef(null);
+  const isActiveGame = Boolean(location.state?.game)
+    && ['/scoreboard', '/record-shots'].includes(location.pathname);
+
+  useEffect(() => {
+    const previous = previousLocation.current;
+    previousLocation.current = location;
+
+    if (!previous || previous.key === location.key || navigationType !== 'POP') return;
+
+    const wasInActiveGame = Boolean(previous.state?.game)
+      && ['/scoreboard', '/record-shots'].includes(previous.pathname);
+
+    if (wasInActiveGame && !window.confirm('Leave the active game? Any shots not yet recorded may be lost.')) {
+      navigate(`${previous.pathname}${previous.search}${previous.hash}`, {
+        replace: true,
+        state: previous.state,
+      });
+    }
+  }, [location, navigationType, navigate]);
+
+  useEffect(() => {
+    if (!isActiveGame) return undefined;
+
+    const warnBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', warnBeforeUnload);
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload);
+  }, [isActiveGame]);
 
   return null;
 };
@@ -77,6 +117,7 @@ const App = () => {
   return (
     <Router basename="/shot-tracker">
       <GameRecovery />
+      <GameNavigationWarning />
       <Routes>
         <Route path="/" element={<GameDetails games={games} onAddGame={handleAddGame} onUpdateGame={handleUpdateGame} />} />
         <Route path="/new" element={<NewGameForm onAddGame={handleAddGame} />} />
