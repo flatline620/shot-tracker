@@ -82,6 +82,28 @@ const Help = () => {
         zIndex: 1000,
       }}
     >
+      <button
+        type="button"
+        onClick={() => navigate('/')}
+        aria-label="Close tutorial"
+        title="Close tutorial"
+        style={{
+          position: 'fixed',
+          top: '16px',
+          right: '16px',
+          border: 'none',
+          borderRadius: '4px',
+          background: 'white',
+          color: '#000',
+          fontSize: '28px',
+          lineHeight: 1,
+          padding: '6px 10px',
+          cursor: 'pointer',
+          zIndex: 1001,
+        }}
+      >
+        &times;
+      </button>
       <div
         style={{
           backgroundColor: 'white',
