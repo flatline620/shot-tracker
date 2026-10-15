@@ -165,7 +165,7 @@ const Scoreboard = () => {
 
   // Column names for different screen sizes
   const columnNames = screenWidth < 675 ? 
-    ['Shooter', 'Hits', 'Score', 'Streaks', 'Action'] : 
+    ['Shooter', 'Hits', 'Max', 'Streaks', 'Action'] : 
     ['Shooter', 'Num Hits', 'Max Score', 'Current / Longest Streak', 'Action'];
 
   // Button names for different screen sizes
