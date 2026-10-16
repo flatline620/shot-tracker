@@ -129,6 +129,35 @@
   margin-top: 8px;
 }
 
+.saved-template-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.saved-template-dialog h3,
+.saved-template-dialog p {
+  margin: 0;
+}
+
+.saved-template-url {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  overflow-wrap: anywhere;
+  font: inherit;
+}
+
+.saved-template-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.saved-template-actions button {
+  flex: 0 1 140px;
+}
+
 .station-naming {
   margin-top: 20px;
 }

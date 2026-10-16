@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ShooterInfo from './ShooterInfo';
 import GameInfo from './GameInfo';
 import NewGameForm from './NewGameForm';
@@ -7,6 +7,59 @@ import StationNaming from './StationNaming';
 import GenericScorecard from './GenericScorecard';
 import locationConfiguration from '../../data/locations.json';
 import './css/GameDetails.css'; // Ensure the correct path to the CSS file
+
+const encodeGameTemplate = (game) => {
+    const template = {
+        templateVersion: 1,
+        location: game.location,
+        locationEmailAddress: game.locationEmailAddress || '',
+        gameSetup: game.gameSetup,
+        randomizeShots: game.randomizeShots,
+        numStations: game.numStations,
+        minShots: game.minShots,
+        maxShots: game.maxShots,
+        totalShots: game.totalShots,
+        stationPairCounts: game.stationPairCounts,
+        shotsDistribution: game.shotsDistribution,
+        truePairsMatrix: game.truePairsMatrix,
+        truePairsOption: game.truePairsOption,
+        truePairWeighting: game.truePairWeighting,
+        allowAllPairs: game.allowAllPairs,
+        allowMixedPairs: game.allowMixedPairs,
+        secondPairWeighting: game.secondPairWeighting,
+        stationNames: game.stationNames,
+        stationDetails: game.stationDetails,
+        launcherPairLabelsMatrix: game.launcherPairLabelsMatrix,
+    };
+    const bytes = new TextEncoder().encode(JSON.stringify(template));
+    let binary = '';
+    bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+
+const decodeGameTemplate = (encodedTemplate) => {
+    if (!encodedTemplate) return null;
+
+    try {
+        const base64 = encodedTemplate.replace(/-/g, '+').replace(/_/g, '/');
+        const paddedBase64 = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+        const bytes = Uint8Array.from(atob(paddedBase64), character => character.charCodeAt(0));
+        const template = JSON.parse(new TextDecoder().decode(bytes));
+
+        if (template.templateVersion !== 1
+            || typeof template.location !== 'string'
+            || !Array.isArray(template.shotsDistribution)
+            || !Array.isArray(template.truePairsMatrix)
+            || !Array.isArray(template.stationNames)) {
+            return null;
+        }
+
+        return template;
+    } catch {
+        return null;
+    }
+};
 
 // Function to distribute shots
 const distributeShots = (numStations, minShotsPerStation, maxShotsPerStation, totalShots) => {
@@ -83,12 +136,20 @@ const createLauncherPairLabelsMatrix = (stationDetails, shotsDistribution, allow
 const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const index = parseInt(id, 10);
-    const [game, setGame] = useState({});
+    const routeLocation = useLocation();
+    const routeGameIndex = parseInt(id, 10);
+    const loadedTemplate = decodeGameTemplate(new URLSearchParams(routeLocation.search).get('game'));
+    const [activeGameIndex, setActiveGameIndex] = useState(
+        Number.isInteger(routeGameIndex) ? routeGameIndex : null
+    );
+    const [game, setGame] = useState(() => games[routeGameIndex] || {});
 
     const [name, setName] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [location, setLocation] = useState('TBSC');
+    const [location, setLocation] = useState(() => loadedTemplate?.location || 'TBSC');
+    const [isTemplateCreator, setIsTemplateCreator] = useState(false);
+    const [templateUrl, setTemplateUrl] = useState('');
+    const [templateUrlCopied, setTemplateUrlCopied] = useState(false);
     const configuredLocation = locationConfiguration.locations.find(
         configured => configured.name.trim().toLowerCase() === location.trim().toLowerCase()
     );
@@ -119,28 +180,30 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
         return configuredStation?.birds ?? stationDetailsForGame?.birds ?? 0;
     };
 
-    const [numStations, setNumStations] = useState(game.numStations || '');
-    const [minShots, setMinShots] = useState(game.minShots || '');
-    const [maxShots, setMaxShots] = useState(game.maxShots || '');
-    const [totalShots, setTotalShots] = useState(game.totalShots || '');
+    const [numStations, setNumStations] = useState(loadedTemplate?.numStations || game.numStations || '');
+    const [minShots, setMinShots] = useState(loadedTemplate?.minShots || game.minShots || '');
+    const [maxShots, setMaxShots] = useState(loadedTemplate?.maxShots || game.maxShots || '');
+    const [totalShots, setTotalShots] = useState(loadedTemplate?.totalShots || game.totalShots || '');
 
     const [shooters, setShooters] = useState(game.shooters || []);
     const [newShooter, setNewShooter] = useState('');
 
     // State for station naming
-    const [stationNames, setStationNames] = useState(Array(game.numStations || 1).fill(''));
+    const [stationNames, setStationNames] = useState(
+        loadedTemplate?.stationNames || game.stationNames || Array(game.numStations || 1).fill('')
+    );
 
     // State for True Pairs option
-    const [truePairsOption, setTruePairsOption] = useState('None');
+    const [truePairsOption, setTruePairsOption] = useState(loadedTemplate?.truePairsOption || 'None');
 
-    const [truePairWeighting, setTruePairWeighting] = useState(50);
-    const [gameSetup, setGameSetup] = useState('Random');
+    const [truePairWeighting, setTruePairWeighting] = useState(loadedTemplate?.truePairWeighting || 50);
+    const [gameSetup, setGameSetup] = useState(loadedTemplate?.gameSetup || 'Random');
     const [stationPairCounts, setStationPairCounts] = useState(() =>
-        Array.from({ length: 7 }, () => ({ reportPairs: 0, truePairs: 0 }))
+        loadedTemplate?.stationPairCounts || Array.from({ length: 7 }, () => ({ reportPairs: 0, truePairs: 0 }))
     );
-    const [secondPairWeighting, setSecondPairWeighting] = useState(50);
-    const [allowAllPairs, setAllowAllPairs] = useState(false);
-    const [allowMixedPairs, setAllowMixedPairs] = useState(false);
+    const [secondPairWeighting, setSecondPairWeighting] = useState(loadedTemplate?.secondPairWeighting || 50);
+    const [allowAllPairs, setAllowAllPairs] = useState(loadedTemplate?.allowAllPairs || false);
+    const [allowMixedPairs, setAllowMixedPairs] = useState(loadedTemplate?.allowMixedPairs || false);
 
     // State for Rotate Shooters
     const [rotateShooters, setRotateShooters] = useState(true); // Default to true
@@ -155,6 +218,18 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     const [editingShotPair, setEditingShotPair] = useState(null);
     const [selectedCourses, setSelectedCourses] = useState({});
     const [selectedStations, setSelectedStations] = useState([]);
+
+    useEffect(() => {
+        if (!Number.isInteger(routeGameIndex) || !games[routeGameIndex]) return;
+        setActiveGameIndex(routeGameIndex);
+        setGame(games[routeGameIndex]);
+    }, [games, routeGameIndex]);
+
+    const persistGameUpdate = (updatedGame) => {
+        if (Number.isInteger(activeGameIndex)) {
+            onUpdateGame(activeGameIndex, updatedGame);
+        }
+    };
 
     const handleGameSetupChange = (setup) => {
         setGameSetup(setup);
@@ -225,7 +300,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             launcherPairLabelsMatrix,
         };
 
-        onUpdateGame(index, updatedGame);
+        persistGameUpdate(updatedGame);
         setGame(updatedGame);
         setStationNames(updatedStationNames);
         setCurrentStep(4);
@@ -336,20 +411,52 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             return;
         }
 
-        setGame({
-            name: name,
-            location: location,
-            date: date,
-            numStations: 7,
-            minShots: 4,
-            maxShots: 8,
-            totalShots: 50,
+        const isCreatingTemplate = !loadedTemplate && name.trim().toLowerCase() === 'template';
+        const newGame = {
+            ...(loadedTemplate || {
+                numStations: 7,
+                minShots: 4,
+                maxShots: 8,
+                totalShots: 50,
+                shooters: [],
+            }),
+            name,
+            location: loadedTemplate?.location || location,
+            date,
             shooters: [],
-        });
+            isTemplateLoaded: Boolean(loadedTemplate),
+        };
+        const newGameIndex = isCreatingTemplate ? null : onAddGame(newGame);
 
-        onAddGame(game);
+        setActiveGameIndex(newGameIndex);
+        setIsTemplateCreator(isCreatingTemplate);
+        setGame(newGame);
+        setLocation(newGame.location);
+        setNumStations(newGame.numStations);
+        setMinShots(newGame.minShots);
+        setMaxShots(newGame.maxShots);
+        setTotalShots(newGame.totalShots);
+        setStationNames(newGame.stationNames || Array(newGame.numStations).fill(''));
+        setSelectedStations(newGame.stationDetails || []);
+        setGameSetup(newGame.gameSetup || (newGame.randomizeShots === false ? 'Custom' : 'Random'));
+        setStationPairCounts(newGame.stationPairCounts || Array.from(
+            { length: newGame.numStations },
+            () => ({ reportPairs: 0, truePairs: 0 })
+        ));
+        setTruePairsOption(newGame.truePairsOption || 'None');
+        setTruePairWeighting(newGame.truePairWeighting || 50);
+        setAllowAllPairs(newGame.allowAllPairs || false);
+        setAllowMixedPairs(newGame.allowMixedPairs || false);
+        setSecondPairWeighting(newGame.secondPairWeighting || 50);
+        setErrorMessages([]);
 
-        handleNextStep();
+        if (loadedTemplate) {
+            setCurrentStep(1);
+        } else if (isCreatingTemplate) {
+            setCurrentStep(2);
+        } else {
+            setCurrentStep(1);
+        }
     };
 
     const handleShooterInfo = () => {
@@ -364,8 +471,12 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             shooters,
             rotateShooters,
         };
-        onUpdateGame(index, updatedGame);
+        persistGameUpdate(updatedGame);
         setGame(updatedGame);
+        if (loadedTemplate) {
+            setCurrentStep(4);
+            return;
+        }
         handleNextStep();
     };
 
@@ -418,7 +529,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             allowMixedPairs: effectiveAllowMixedPairs,
             secondPairWeighting: effectiveSecondPairWeighting,
         };
-        onUpdateGame(index, updatedGame);
+        persistGameUpdate(updatedGame);
         setGame(updatedGame);
         if (gameSetup === 'Quick') {
             setErrorMessages([]);
@@ -467,7 +578,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             stationDetails,
             launcherPairLabelsMatrix,
         };
-        onUpdateGame(index, updatedGame);
+        persistGameUpdate(updatedGame);
         setGame(updatedGame);
         setStationNames(updatedStationNames);
         setErrorMessages([]);
@@ -509,12 +620,63 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
         const updatedGame = { ...game, truePairsMatrix, launcherPairLabelsMatrix };
 
         setGame(updatedGame);
-        onUpdateGame(index, updatedGame);
+        persistGameUpdate(updatedGame);
         setEditingShotPair(null);
     };
 
     const handleStartShooting = () => {
         navigate('/scoreboard', { state: { game } });
+    };
+
+    const handleSaveTemplate = () => {
+        const encodedTemplate = encodeGameTemplate({
+            ...game,
+            locationEmailAddress: configuredLocation?.emailAddress || '',
+        });
+        const url = new URL(window.location.href);
+        url.search = '';
+        url.hash = '';
+        url.searchParams.set('game', encodedTemplate);
+        setTemplateUrl(url.toString());
+        setTemplateUrlCopied(false);
+    };
+
+    const handleCopyTemplateUrl = async () => {
+        try {
+            await navigator.clipboard.writeText(templateUrl);
+            setTemplateUrlCopied(true);
+        } catch {
+            document.getElementById('saved-template-url')?.select();
+        }
+    };
+
+    const handleTemplateDone = () => {
+        setTemplateUrl('');
+        setTemplateUrlCopied(false);
+        setIsTemplateCreator(false);
+        setActiveGameIndex(null);
+        setGame({});
+        setName('');
+        setDate(new Date().toISOString().split('T')[0]);
+        setLocation('TBSC');
+        setNumStations('');
+        setMinShots('');
+        setMaxShots('');
+        setTotalShots('');
+        setStationNames(['']);
+        setShooters([]);
+        setNewShooter('');
+        setGameSetup('Random');
+        setStationPairCounts(Array.from({ length: 7 }, () => ({ reportPairs: 0, truePairs: 0 })));
+        setTruePairsOption('None');
+        setTruePairWeighting(50);
+        setAllowAllPairs(false);
+        setAllowMixedPairs(false);
+        setSecondPairWeighting(50);
+        setSelectedStations([]);
+        setErrorMessages([]);
+        setCurrentStep(0);
+        navigate('/', { replace: true });
     };
 
     const editingStationIndex = editingShotPair?.stationIndex;
@@ -552,6 +714,14 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
 
     const handlePreviousStep = () => {
         setErrorMessages([]);
+        if (loadedTemplate && currentStep === 4) {
+            setCurrentStep(1);
+            return;
+        }
+        if (isTemplateCreator && currentStep === 2) {
+            setCurrentStep(0);
+            return;
+        }
         setCurrentStep((prevStep) => prevStep - 1);
     };
 
@@ -567,7 +737,15 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             )}
 
             {currentStep === 0 && (
-                <NewGameForm name={name} setName={setName} location={location} setLocation={setLocation} date={date} setDate={setDate} />
+                <NewGameForm
+                    name={name}
+                    setName={setName}
+                    location={location}
+                    setLocation={setLocation}
+                    date={date}
+                    setDate={setDate}
+                    locationLocked={Boolean(loadedTemplate)}
+                />
             )}
 
             {currentStep === 1 && (
@@ -625,7 +803,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                 <div className="scorecard-preview">
                     <div className="scorecard-preview-heading">
                         <h2>Scorecard Preview</h2>
-                        <button
+                        {!game.isTemplateLoaded && <button
                             type="button"
                             className="launcher-help-button"
                             aria-label="Scorecard Preview information"
@@ -633,12 +811,12 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                             onClick={() => setIsPreviewInfoOpen(true)}
                         >
                             ℹ️
-                        </button>
+                        </button>}
                     </div>
                     <GenericScorecard
                         title={null}
                         verticalStations
-                        onShotClick={handleEditShotPair}
+                        onShotClick={game.isTemplateLoaded ? undefined : handleEditShotPair}
                         shotsDistribution={game.shotsDistribution || []}
                         stationNames={game.stationNames || []}
                         truePairsMatrix={game.truePairsMatrix || []}
@@ -647,7 +825,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                 </div>
             )}
 
-            {isPreviewInfoOpen && (
+            {isPreviewInfoOpen && !game.isTemplateLoaded && (
                 <div className="launcher-info-backdrop" role="presentation" onClick={() => setIsPreviewInfoOpen(false)}>
                     <div
                         className="launcher-info-dialog"
@@ -661,6 +839,35 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                         </button>
                         <h3 id="scorecard-preview-info-title">Scorecard Preview</h3>
                         <p>Click any shot to edit its two-shot pair, including True Pair status and launcher assignment when available. Changes apply to both shots in the pair.</p>
+                    </div>
+                </div>
+            )}
+
+            {templateUrl && (
+                <div className="launcher-info-backdrop" role="presentation">
+                    <div
+                        className="launcher-info-dialog saved-template-dialog"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="saved-template-title"
+                    >
+                        <h3 id="saved-template-title">Template Saved</h3>
+                        <p>Share this URL to let others load the game setup.</p>
+                        <textarea
+                            id="saved-template-url"
+                            className="saved-template-url"
+                            value={templateUrl}
+                            readOnly
+                            onFocus={event => event.target.select()}
+                        />
+                        <div className="saved-template-actions">
+                            <button type="button" className="back-button" onClick={handleCopyTemplateUrl}>
+                                {templateUrlCopied ? 'Copied' : 'Copy URL'}
+                            </button>
+                            <button type="button" className="confirm-button" onClick={handleTemplateDone}>
+                                Done
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -814,10 +1021,10 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                 {currentStep === 4 && (
                     <button
                         type="button"
-                        onClick={handleStartShooting}
+                        onClick={isTemplateCreator ? handleSaveTemplate : handleStartShooting}
                         className="confirm-button"
                     >
-                        PULL
+                        {isTemplateCreator ? 'Save' : 'PULL'}
                     </button>
                 )}
             </div>

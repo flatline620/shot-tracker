@@ -268,7 +268,10 @@ const RecordShots = () => {
       </div>
       <div className="selected-station-preview">
         <h2>Current Station Preview</h2>
-        {renderStationGrid(currentStation - 1)}
+        <div className="selected-station-preview-grid-row">
+          <div className="recorded-shots-station-name" aria-hidden="true"></div>
+          {renderStationGrid(currentStation - 1)}
+        </div>
       </div>
       <div className="record-cancel-button-container">
         <button className="record-button" onClick={handleRecordShots} disabled={!areCurrentStationShotsComplete()}>

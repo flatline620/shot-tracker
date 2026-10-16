@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const NewGameForm = ({ name, setName, location, setLocation, date, setDate }) => {
+const NewGameForm = ({ name, setName, location, setLocation, date, setDate, locationLocked = false }) => {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -29,6 +29,8 @@ const NewGameForm = ({ name, setName, location, setLocation, date, setDate }) =>
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              readOnly={locationLocked}
+              aria-readonly={locationLocked}
               className={(location && location.trim() === '') ? 'invalid' : ''}
           />
         </div>

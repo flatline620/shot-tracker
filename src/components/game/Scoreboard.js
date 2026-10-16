@@ -474,7 +474,7 @@ const Scoreboard = () => {
           <button onClick={handleEndGame} className="end-button">End Game</button>
         </div>
       ) : (
-        !isRenamingStations && (
+        !isRenamingStations && !game.isTemplateLoaded && (
           <div className="buttons-container">
             <button onClick={handleStartStationEditing} className="rename-button">Edit Stations</button>
             <button onClick={handleEndGame} className="end-button">End Game</button>

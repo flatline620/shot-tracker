@@ -63,19 +63,22 @@
 .record-shots-station-grid {
   display: grid;
   gap: 5px;
-  grid-template-columns: repeat(12, 40px); /* Default: 6 columns per row */
+  grid-template-columns: repeat(8, 40px);
   grid-auto-rows: 40px; /* Keep rows consistent */
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  padding: 4px;
 }
 
 @media (max-width: 675px) {
   .record-shots-station-grid {
-    grid-template-columns: repeat(6, 40px); /* 4 columns for medium screens */
+    grid-template-columns: repeat(6, 40px);
   }
 }
 
 @media (max-width: 575px) {
   .record-shots-station-grid {
-    grid-template-columns: repeat(4, 40px); /* 3 columns for smaller screens */
+    grid-template-columns: repeat(4, 40px);
   }
 }
 
@@ -194,7 +197,13 @@
   display: grid;
   gap: 5px;
   justify-content: start;
-  width: max-content;
   max-width: 100%;
-  margin: 0 auto; /* Center the grid horizontally */
+  margin: 0;
+}
+
+.selected-station-preview-grid-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  max-width: 100%;
 }

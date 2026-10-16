@@ -82,17 +82,18 @@ const App = () => {
   ]);
 
   const handleAddGame = (newGame) => {
-    newGame = {...newGame, 
+    const gameToAdd = {
         numStations: 7,
         minShots: 4,
         maxShots: 8,
         totalShots: 50,
-        shooters: []
+      shooters: [],
+      ...newGame,
     };
     
     const newIndex = games.length;
     setGames((prevGames) => {
-      const updatedGames = [...prevGames, newGame];
+      const updatedGames = [...prevGames, gameToAdd];
 
       return updatedGames;
     });
