@@ -155,6 +155,10 @@ const Scoreboard = () => {
   const handleConfirmStationNames = () => {
     // Update the station names in the game object or backend
     game.stationNames = localStationNames;
+    game.stationDetails = game.stationDetails?.map((station, index) => ({
+      ...station,
+      name: localStationNames[index],
+    }));
     setIsRenamingStations(false);
   };
 

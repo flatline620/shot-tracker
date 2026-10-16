@@ -4,6 +4,7 @@ import ShooterInfo from './ShooterInfo';
 import GameInfo from './GameInfo';
 import NewGameForm from './NewGameForm';
 import StationNaming from './StationNaming';
+import locationConfiguration from '../../data/locations.json';
 import './css/GameDetails.css'; // Ensure the correct path to the CSS file
 
 // Function to distribute shots
@@ -52,6 +53,11 @@ const generateTruePairsMatrix = (shots, truePairsOption, truePairWeighting) => {
     return truePairsMatrix;
 };
 
+const createLauncherLabels = (birdCount, numberingScheme) =>
+    Array.from({ length: birdCount }, (_, index) =>
+        numberingScheme === 'Letters' ? String.fromCharCode(65 + index) : String(index + 1)
+    );
+
 const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -61,6 +67,10 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     const [name, setName] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [location, setLocation] = useState('TBSC');
+    const configuredLocation = locationConfiguration.locations.find(
+        configured => configured.name.trim().toLowerCase() === location.trim().toLowerCase()
+    );
+    const availableCourses = configuredLocation?.courses || [];
 
     const [numStations, setNumStations] = useState(game.numStations || '');
     const [minShots, setMinShots] = useState(game.minShots || '');
@@ -87,18 +97,13 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
 
     // Modal State for Randomize Stations
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedCourses, setSelectedCourses] = useState({
-        Green: false,
-        Orange: false,
-        Pink: false,
-        Black: false,
-        Red: false,
-        Yellow: false,
-        Purple: false,
-        Blue: false,
-    });
+    const [selectedCourses, setSelectedCourses] = useState({});
+    const [selectedStations, setSelectedStations] = useState([]);
 
-    const colorOptions = ['Green', 'Orange', 'Pink', 'Black', 'Red', 'Yellow', 'Purple', 'Blue'];
+    useEffect(() => {
+        setSelectedCourses(Object.fromEntries(availableCourses.map(course => [course.name, false])));
+        setSelectedStations([]);
+    }, [configuredLocation]);
 
     useEffect(() => {
         setNumStations(game.numStations || '');
@@ -121,112 +126,48 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     };
 
     const handleAssignStations = () => {
-        // Call the function to assign stations
-        const selectedCoursesArray = Object.keys(selectedCourses).filter(course => selectedCourses[course]);
-        randomizeStations(selectedCoursesArray);
-
-        setIsModalOpen(false);
+        const selectedCoursesArray = availableCourses.filter(course => selectedCourses[course.name]);
+        if (randomizeStations(selectedCoursesArray)) setIsModalOpen(false);
     };
 
     function randomizeStations(selectedCoursesArray) {
-        // If no colors were selected, do not randomize
-        if (selectedCoursesArray.length === 0) return;
-    
-        // Generate all available stations (1-7) for each selected color
-        let availableStations = [];
-    
-        // Generate stations for each selected color
-        for (let course of selectedCoursesArray) {
-            for (let i = 1; i <= 7; i++) {
-                availableStations.push(`${course} ${i}`);  // "Green 1", "Red 2", etc.
-            }
+        if (selectedCoursesArray.length === 0) {
+            setErrorMessages(['Select at least one course.']);
+            return false;
         }
-    
-        // Shuffle the available stations for randomization
-        shuffleArray(availableStations);
-    
-        // Assign the shuffled stations to the game.stationNames list, ensuring there are enough stations
-        let finalStations = [];
-    
-        for (let i = 0; i < numStations; i++) {
-            // If we still have stations to assign, pick one from the shuffled list
-            if (i < availableStations.length) {
-                finalStations.push(availableStations[i]);
-            } else {
-                // If more stations are needed than available, reuse stations in round-robin fashion
-                finalStations.push(availableStations[i % availableStations.length]);
-            }
+
+        const availableStations = selectedCoursesArray.flatMap(course =>
+            course.stations.map(station => ({
+                ...station,
+                course: course.name,
+                difficulty: course.difficulty,
+                launchers: createLauncherLabels(station.birds, configuredLocation.launcherNumberingScheme),
+            }))
+        );
+        const stationCount = Number(numStations);
+
+        if (availableStations.length < stationCount) {
+            setErrorMessages([`The selected courses have ${availableStations.length} stations, but ${stationCount} are required.`]);
+            return false;
         }
-    
-        // Now sort the stations using the new sortStations function
-        finalStations = sortStations(finalStations);
-    
-        // Assign the final sorted stations to the game detail
-        // stationNameList = finalStations;
-        setStationNames(finalStations);
+
+        const randomizedStations = [...availableStations];
+        shuffleArray(randomizedStations);
+        const chosenStations = new Set(randomizedStations.slice(0, stationCount));
+        const finalStations = availableStations.filter(station => chosenStations.has(station));
+
+        setSelectedStations(finalStations);
+        setStationNames(finalStations.map(station => station.name));
+        setErrorMessages([]);
+        return true;
     }
     
     // Helper function to shuffle an array (Fisher-Yates algorithm)
     function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];  // Swap elements
+        for (let index = array.length - 1; index > 0; index--) {
+            const randomIndex = Math.floor(Math.random() * (index + 1));
+            [array[index], array[randomIndex]] = [array[randomIndex], array[index]];
         }
-    }
-    
-    function sortStations(stations) {
-        // Base case: if no stations to sort, return the list
-        if (stations.length === 0) return [];
-    
-        // Sort stations by color and station number
-        let sortedStations = stations.sort((station1, station2) => {
-            let color1 = station1.split(" ")[0];
-            let color2 = station2.split(" ")[0];
-    
-            // Find the index of the color in the colorOptions array
-            let color1Index = colorOptions.indexOf(color1);
-            let color2Index = colorOptions.indexOf(color2);
-    
-            // If color is not found, set index to maximum
-            color1Index = color1Index === -1 ? Number.MAX_SAFE_INTEGER : color1Index;
-            color2Index = color2Index === -1 ? Number.MAX_SAFE_INTEGER : color2Index;
-    
-            // First, compare by color
-            if (color1Index === color2Index) {
-                // If the colors are the same, compare by station number
-                let num1 = parseInt(station1.split(" ")[1], 10);
-                let num2 = parseInt(station2.split(" ")[1], 10);
-                return num1 - num2;
-            }
-    
-            // Otherwise, compare by color index
-            return color1Index - color2Index;
-        });
-    
-        // Set to track stations we've already added to the final list
-        let finalStations = [];
-        let tempStations = [];
-    
-        // Go through the sorted stations and handle duplicates
-        for (let station of sortedStations) {
-            if (finalStations.includes(station)) {
-                // If the station is already in the final list, add it to the temp list
-                tempStations.push(station);
-            } else {
-                // If the station is not a duplicate, add it to the final list
-                finalStations.push(station);
-            }
-        }
-    
-        // If we have any duplicates, recursively sort them again
-        if (tempStations.length > 0) {
-            let tempSorted = sortStations(tempStations);
-            // Append the results of the recursive sort to the final stations
-            finalStations = finalStations.concat(tempSorted);
-        }
-    
-        // Return the sorted stations
-        return finalStations;
     }
     
     const validateForm = () => {
@@ -333,10 +274,15 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     const handleStartShooting = () => {
         // Replace empty names with default "Station X"
         const updatedStationNames = stationNames.map((name, idx) => name.trim() ? name : `Station ${idx + 1}`);
+        const stationDetails = selectedStations.map((station, index) => ({
+            ...station,
+            name: updatedStationNames[index],
+        }));
 
         const updatedGame = {
             ...game,
-            stationNames: updatedStationNames
+            stationNames: updatedStationNames,
+            stationDetails,
         };
         onUpdateGame(index, updatedGame);
         setGame(updatedGame);
@@ -427,7 +373,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                 />
             )}
 
-            {game.location === 'TBSC' && currentStep === 3 && (
+            {configuredLocation && currentStep === 3 && (
                 <button className="randomize-button" onClick={handleRandomizeStations}>
                     Randomize Stations
                 </button>
@@ -437,23 +383,33 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             {isModalOpen && (
                 <div className="modal">
                     <div className="modal-content">
-                        <h2>Select Courses</h2>
+                        <h2>Select {configuredLocation.name} Courses</h2>
                         <div className="course-checkboxes-container">
-                            {Object.keys(selectedCourses).map((course) => (
-                                <div key={course} className="toggle-switch-container">
-                                    <label htmlFor={course} className="switch">
+                            {availableCourses.map((course) => (
+                                <div key={course.name} className="toggle-switch-container">
+                                    <label htmlFor={`course-${course.name}`} className="switch">
                                         <input
                                             type="checkbox"
-                                            id={course}
-                                            checked={selectedCourses[course]}
-                                            onChange={() => handleCourseSelection(course)}
+                                            id={`course-${course.name}`}
+                                            checked={Boolean(selectedCourses[course.name])}
+                                            onChange={() => handleCourseSelection(course.name)}
                                         />
                                         <span className="slider"></span>
                                     </label>
-                                    <label htmlFor={course}>{course}</label>
+                                    <label htmlFor={`course-${course.name}`} className="course-option-label">
+                                        <span className="course-option-name">{course.name}</span>
+                                        <span className="course-option-difficulty">{course.difficulty}</span>
+                                    </label>
                                 </div>
                             ))}
                         </div>
+                        {errorMessages.length > 0 && (
+                            <div className="error-messages">
+                                <ul>
+                                    {errorMessages.map((error, index) => <li key={index}>{error}</li>)}
+                                </ul>
+                            </div>
+                        )}
                         <div className="assign-stations-button-container">
                             <button onClick={handleAssignStations} className="assign-stations-button">
                                 Assign Stations
