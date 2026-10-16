@@ -25,7 +25,7 @@ const Help = () => {
     },
     {
       image: 'tutorial-station-names.jpg',
-      description: 'Before viewing the generated scoreboard, you can choose the stations for the game. You can name them manually or, for a configured location, select courses and use \'Randomize Stations\'. If a station is not functioning properly, you can edit station names during the game by pressing \'Rename Stations\' on the Scoreboard.',
+      description: 'Before viewing the generated scoreboard, you can choose the stations for the game. You can name them manually or, for a configured location, select courses and use \'Randomize Stations\'. During a game, use \'Edit Stations\' to change stations that have not been shot.',
     },
     {
       image: 'tutorial-assign-stations.jpg',

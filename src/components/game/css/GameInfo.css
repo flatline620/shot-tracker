@@ -79,6 +79,90 @@
   border-bottom-right-radius: 25px;
 }
 
+.randomize-shots-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 400px;
+  margin-bottom: 24px;
+}
+
+.manual-pair-allocation {
+  max-width: 600px;
+  margin: 24px 0;
+}
+
+.manual-pair-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.manual-pair-summary span {
+  font-weight: bold;
+}
+
+.manual-pair-header,
+.manual-pair-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) repeat(2, minmax(100px, 1fr));
+  align-items: center;
+  gap: 8px;
+}
+
+.manual-pair-header {
+  padding: 8px 0;
+  border-bottom: 2px solid #ccc;
+  font-weight: bold;
+  text-align: center;
+}
+
+.manual-pair-row {
+  min-height: 48px;
+  border-bottom: 1px solid #ddd;
+}
+
+.manual-pair-row > strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.manual-pair-control {
+  display: grid;
+  grid-template-columns: 32px minmax(20px, 1fr) 32px;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.manual-pair-control button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: white;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.manual-pair-increment {
+  background-color: #288243;
+}
+
+.manual-pair-decrement {
+  background-color: #b43b3b;
+}
+
+.manual-pair-control button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .launcher-settings-container {
   display: grid;
   gap: 16px;

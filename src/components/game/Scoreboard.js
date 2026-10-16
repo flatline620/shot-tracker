@@ -6,6 +6,7 @@ import StationNaming from './StationNaming';
 import StationGrid from './StationGrid';
 import './css/Scoreboard.css';
 import { clearSavedGameProgress } from './gameProgress';
+import locationConfiguration from '../../data/locations.json';
 
 const Scoreboard = () => {
   const location = useLocation();
@@ -14,8 +15,25 @@ const Scoreboard = () => {
   const [localStationNames, setLocalStationNames] = useState(location.state?.game?.stationNames || []);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth); // State to track screen width
   const game = location.state?.game || { shooters: [] };
+  const [editGame, setEditGame] = useState(null);
+  const [editingShotPair, setEditingShotPair] = useState(null);
   const currentShooter = location.state?.currentShooter || (game.shooters.length > 0 ? game.shooters[0] : null);
   const screenshotRef = useRef(null); // Ref to capture the content
+  const configuredLocation = locationConfiguration.locations.find(
+    configured => configured.name.trim().toLowerCase() === (game.location || '').trim().toLowerCase()
+  );
+  const configuredStations = configuredLocation?.courses.flatMap(course => course.stations.map(station => ({
+    ...station,
+    course: course.name,
+    difficulty: course.difficulty,
+    launchers: Array.from({ length: station.birds }, (_, launcherIndex) =>
+      configuredLocation.launcherNumberingScheme === 'Letters'
+        ? String.fromCharCode(65 + launcherIndex)
+        : String(launcherIndex + 1)
+    ),
+  }))) || [];
+  const alternateLauncherPairName = configuredLocation?.launcherNumberingScheme === 'Letters' ? 'C/D' : '3/4';
+  const standardLauncherPairName = configuredLocation?.launcherNumberingScheme === 'Letters' ? 'A/B' : '1/2';
 
   useEffect(() => {
     // Update the screen width on window resize
@@ -151,21 +169,94 @@ const Scoreboard = () => {
     const updatedStationNames = [...localStationNames];
     updatedStationNames[index] = newName;
     setLocalStationNames(updatedStationNames);
+
+    const selectedStation = configuredStations.find(station => station.name === newName);
+    setEditGame(currentGame => {
+      const stationDetails = [...currentGame.stationDetails];
+      stationDetails[index] = selectedStation
+        ? { ...selectedStation, configurationName: selectedStation.name, name: newName }
+        : { name: newName, birds: 0, launchers: [] };
+      const launcherPairLabelsMatrix = currentGame.launcherPairLabelsMatrix.map((labels, stationIndex) =>
+        stationIndex === index
+          ? (selectedStation?.birds > 2 ? labels : Array(currentGame.shotsDistribution[index]).fill(''))
+          : labels
+      );
+
+      return { ...currentGame, stationDetails, launcherPairLabelsMatrix };
+    });
   };
 
   const handleConfirmStationNames = () => {
-    // Update the station names in the game object or backend
-    game.stationNames = localStationNames;
-    game.stationDetails = game.stationDetails?.map((station, index) => ({
-      ...station,
-      name: localStationNames[index],
-    }));
+    Object.assign(game, editGame, { stationNames: localStationNames });
     setIsRenamingStations(false);
+    setEditGame(null);
+  };
+
+  const handleStartStationEditing = () => {
+    setLocalStationNames([...stationNames]);
+    setEditGame({
+      ...game,
+      stationDetails: (game.stationDetails || stationNames.map(name => ({ name, birds: 0, launchers: [] })))
+        .map(station => ({ ...station })),
+      truePairsMatrix: truePairsMatrix.map(station => [...station]),
+      launcherPairLabelsMatrix: shotsDistribution.map((shotsAtStation, stationIndex) =>
+        [...(launcherPairLabelsMatrix[stationIndex] || Array(shotsAtStation).fill(''))]
+      ),
+    });
+    setIsRenamingStations(true);
+  };
+
+  const stationHasBeenShot = (stationIndex) => shooters.some(shooter =>
+    (shooter.shots || []).some(shot => shot.station === stationIndex + 1)
+  );
+
+  const handleEditShotPair = (stationIndex, shotIndex) => {
+    if (!editGame || stationHasBeenShot(stationIndex)) return;
+    const pairStart = Math.floor(shotIndex / 2) * 2;
+    const currentLauncherPair = editGame.launcherPairLabelsMatrix[stationIndex]?.[pairStart];
+    setEditingShotPair({
+      stationIndex,
+      pairStart,
+      isTruePair: Boolean(editGame.truePairsMatrix[stationIndex]?.[pairStart]),
+      launcherPair: currentLauncherPair ? 'alternate' : 'standard',
+    });
+  };
+
+  const handleSaveShotPair = () => {
+    if (!editingShotPair || !editGame) return;
+
+    const { stationIndex, pairStart } = editingShotPair;
+    const pairShotIndexes = [pairStart, pairStart + 1].filter(
+      shotIndex => shotIndex < editGame.shotsDistribution[stationIndex]
+    );
+    const truePairsMatrix = editGame.truePairsMatrix.map((station, index) =>
+      index === stationIndex
+        ? station.map((value, shotIndex) => pairShotIndexes.includes(shotIndex) ? editingShotPair.isTruePair : value)
+        : station
+    );
+    const launcherPairLabelsMatrix = editGame.launcherPairLabelsMatrix.map((station, index) =>
+      index === stationIndex
+        ? station.map((value, shotIndex) => pairShotIndexes.includes(shotIndex)
+          ? (editingShotPair.launcherPair === 'alternate' ? alternateLauncherPairName : '')
+          : value)
+        : station
+    );
+
+    setEditGame(currentGame => ({ ...currentGame, truePairsMatrix, launcherPairLabelsMatrix }));
+    setEditingShotPair(null);
   };
 
   const handleCancelStationNaming = () => {
     setIsRenamingStations(false);
+    setEditGame(null);
+    setEditingShotPair(null);
   };
+
+  const editingStationDetails = editGame?.stationDetails?.[editingShotPair?.stationIndex];
+  const canEditLauncherPair = Boolean(
+    editingShotPair
+    && editingStationDetails?.birds > 2
+  );
 
   // const handleCapture = async () => {
   //   if (screenshotRef.current) {
@@ -197,7 +288,14 @@ const Scoreboard = () => {
         {isRenamingStations ? (
           <>
             <StationNaming
+              heading="Edit Stations"
               stationNames={localStationNames}
+              stationOptions={configuredLocation ? configuredStations : []}
+              stationShotsDistribution={shotsDistribution}
+              truePairsMatrix={editGame?.truePairsMatrix || truePairsMatrix}
+              launcherPairLabelsMatrix={editGame?.launcherPairLabelsMatrix || launcherPairLabelsMatrix}
+              lockedStations={stationNames.map((_, index) => stationHasBeenShot(index) ? index : null).filter(index => index !== null)}
+              onShotClick={handleEditShotPair}
               onStationNameChange={handleStationNameChange}
               onConfirm={handleConfirmStationNames}
               onCancel={handleCancelStationNaming}
@@ -301,6 +399,74 @@ const Scoreboard = () => {
         )}
       </div>
 
+      {editingShotPair && (
+        <div className="launcher-info-backdrop" role="presentation" onClick={() => setEditingShotPair(null)}>
+          <div
+            className="launcher-info-dialog shot-pair-edit-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="scoreboard-pair-edit-title"
+            onClick={event => event.stopPropagation()}
+          >
+            <button type="button" className="launcher-info-close" onClick={() => setEditingShotPair(null)} aria-label="Close pair editor">
+              &times;
+            </button>
+            <h3 id="scoreboard-pair-edit-title">
+              {localStationNames[editingShotPair.stationIndex]}: shots {editingShotPair.pairStart + 1}-{Math.min(editingShotPair.pairStart + 2, shotsDistribution[editingShotPair.stationIndex])}
+            </h3>
+            <div className="shot-pair-edit-setting">
+              <label className="true-pairs-label">True Pair:</label>
+              <div className="toggle-group" role="radiogroup" aria-label="True Pair">
+                <input
+                  type="radio"
+                  id="scoreboardTruePairYes"
+                  name="scoreboardTruePair"
+                  checked={editingShotPair.isTruePair}
+                  onChange={() => setEditingShotPair(current => ({ ...current, isTruePair: true }))}
+                  className="toggle-button"
+                />
+                <label htmlFor="scoreboardTruePairYes" className={`toggle-button-label ${editingShotPair.isTruePair ? 'active' : ''}`}>Yes</label>
+                <input
+                  type="radio"
+                  id="scoreboardTruePairNo"
+                  name="scoreboardTruePair"
+                  checked={!editingShotPair.isTruePair}
+                  onChange={() => setEditingShotPair(current => ({ ...current, isTruePair: false }))}
+                  className="toggle-button"
+                />
+                <label htmlFor="scoreboardTruePairNo" className={`toggle-button-label ${!editingShotPair.isTruePair ? 'active' : ''}`}>No</label>
+              </div>
+            </div>
+            {canEditLauncherPair && (
+              <div className="shot-pair-edit-setting">
+                <label className="true-pairs-label">Launcher Pair:</label>
+                <div className="toggle-group" role="radiogroup" aria-label="Launcher Pair">
+                  <input
+                    type="radio"
+                    id="scoreboardStandardLaunchers"
+                    name="scoreboardLauncherPair"
+                    checked={editingShotPair.launcherPair === 'standard'}
+                    onChange={() => setEditingShotPair(current => ({ ...current, launcherPair: 'standard' }))}
+                    className="toggle-button"
+                  />
+                  <label htmlFor="scoreboardStandardLaunchers" className={`toggle-button-label ${editingShotPair.launcherPair === 'standard' ? 'active' : ''}`}>{standardLauncherPairName}</label>
+                  <input
+                    type="radio"
+                    id="scoreboardAlternateLaunchers"
+                    name="scoreboardLauncherPair"
+                    checked={editingShotPair.launcherPair === 'alternate'}
+                    onChange={() => setEditingShotPair(current => ({ ...current, launcherPair: 'alternate' }))}
+                    className="toggle-button"
+                  />
+                  <label htmlFor="scoreboardAlternateLaunchers" className={`toggle-button-label ${editingShotPair.launcherPair === 'alternate' ? 'active' : ''}`}>{alternateLauncherPairName}</label>
+                </div>
+              </div>
+            )}
+            <button type="button" className="confirm-button" onClick={handleSaveShotPair}>Save Pair</button>
+          </div>
+        </div>
+      )}
+
       {allShootersFinished ? (
         <div className="buttons-container">
           <button onClick={copyResults} className="results-button">Copy Results</button>
@@ -310,7 +476,7 @@ const Scoreboard = () => {
       ) : (
         !isRenamingStations && (
           <div className="buttons-container">
-            <button onClick={() => setIsRenamingStations(true)} className="rename-button">Rename Stations</button>
+            <button onClick={handleStartStationEditing} className="rename-button">Edit Stations</button>
             <button onClick={handleEndGame} className="end-button">End Game</button>
           </div>
         )

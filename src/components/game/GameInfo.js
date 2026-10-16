@@ -10,6 +10,10 @@ const GameInfo = ({
   setMaxShots,
   totalShots,
   setTotalShots,
+  randomizeShots,
+  setRandomizeShots,
+  stationPairCounts,
+  setStationPairCounts,
   truePairsOption,
   setTruePairsOption,
   truePairWeighting,
@@ -26,9 +30,13 @@ const GameInfo = ({
 }) => {
   const [activeHelp, setActiveHelp] = useState(null);
   const handleNumStationsChange = (e) => {
-    setNumStations(e.target.value);
-    
-    validateTotalShots(e.target.value, minShots, maxShots);
+    const value = Number(e.target.value);
+    setNumStations(value);
+    setStationPairCounts(currentCounts => Array.from({ length: value }, (_, index) =>
+      currentCounts[index] || { reportPairs: 0, truePairs: 0 }
+    ));
+
+    if (randomizeShots) validateTotalShots(value, minShots, maxShots);
   };
 
   const handleMinShotsChange = (e) => {
@@ -56,7 +64,30 @@ const GameInfo = ({
   };
 
   const handleTotalShotsChange = (e) => {
-    updateTotalShots(numStations, minShots, maxShots, Number(e.target.value));
+    const value = Number(e.target.value);
+    if (randomizeShots) {
+      updateTotalShots(numStations, minShots, maxShots, value);
+    } else {
+      setTotalShots(value);
+    }
+  };
+
+  const assignedShotCount = stationPairCounts.reduce(
+    (total, station) => total + (station.reportPairs + station.truePairs) * 2,
+    0
+  );
+  const remainingShotCount = totalShots - assignedShotCount;
+
+  const handlePairCountChange = (stationIndex, pairType, change) => {
+    const currentPairs = stationPairCounts[stationIndex][pairType];
+    if (change < 0 && currentPairs === 0) return;
+    if (change > 0 && assignedShotCount + 2 > totalShots) return;
+
+    setStationPairCounts(currentCounts => currentCounts.map((station, index) =>
+      index === stationIndex
+        ? { ...station, [pairType]: station[pairType] + change }
+        : station
+    ));
   };
 
   function validateTotalShots(numberOfStations, minShotsPerStation, maxShotsPerStation) {
@@ -89,6 +120,34 @@ const GameInfo = ({
     <div>
       <h2>Game Info</h2>
 
+      <div className="randomize-shots-setting">
+        <label className="true-pairs-label">Randomize Shots:</label>
+        <div className="toggle-group" role="radiogroup" aria-label="Randomize Shots">
+          <input
+            type="radio"
+            id="randomizeShotsYes"
+            name="randomizeShots"
+            checked={randomizeShots}
+            onChange={() => setRandomizeShots(true)}
+            className="toggle-button"
+          />
+          <label htmlFor="randomizeShotsYes" className={`toggle-button-label ${randomizeShots ? 'active' : ''}`}>Yes</label>
+          <input
+            type="radio"
+            id="randomizeShotsNo"
+            name="randomizeShots"
+            checked={!randomizeShots}
+            onChange={() => {
+              setRandomizeShots(false);
+              setAllowAllPairs(false);
+              setAllowMixedPairs(false);
+            }}
+            className="toggle-button"
+          />
+          <label htmlFor="randomizeShotsNo" className={`toggle-button-label ${!randomizeShots ? 'active' : ''}`}>No</label>
+        </div>
+      </div>
+
       <form className="game-form">
       <div className="form-row">
         <label htmlFor="numStations">Number of Stations:</label>
@@ -103,33 +162,37 @@ const GameInfo = ({
         <span>{numStations}</span>
       </div>
 
-        <div className="form-row">
-          <label htmlFor="minShots">Min Shots per Station:</label>
-          <input
-            id="minShots"
-            type="range"
-            min="2"
-            max="8"
-            step="2"
-            value={minShots}
-            onChange={handleMinShotsChange}
-          />
-          <span>{minShots}</span>
-        </div>
+        {randomizeShots && (
+          <div className="form-row">
+            <label htmlFor="minShots">Min Shots per Station:</label>
+            <input
+              id="minShots"
+              type="range"
+              min="2"
+              max="8"
+              step="2"
+              value={minShots}
+              onChange={handleMinShotsChange}
+            />
+            <span>{minShots}</span>
+          </div>
+        )}
 
-        <div className="form-row">
-          <label htmlFor="maxShots">Max Shots per Station:</label>
-          <input
-            id="maxShots"
-            type="range"
-            min="2"
-            max="8"
-            step="2"
-            value={maxShots}
-            onChange={handleMaxShotsChange}
-          />
-          <span>{maxShots}</span>
-        </div>
+        {randomizeShots && (
+          <div className="form-row">
+            <label htmlFor="maxShots">Max Shots per Station:</label>
+            <input
+              id="maxShots"
+              type="range"
+              min="2"
+              max="8"
+              step="2"
+              value={maxShots}
+              onChange={handleMaxShotsChange}
+            />
+            <span>{maxShots}</span>
+          </div>
+        )}
 
         <div className="form-row">
           <label htmlFor="totalShots">Total Shots:</label>
@@ -146,7 +209,52 @@ const GameInfo = ({
         </div>
       </form>
 
-      {hasFourLauncherStations && (
+      {!randomizeShots && (
+        <div className="manual-pair-allocation">
+          <div className="manual-pair-summary">
+            <strong>Shot Allocation</strong>
+            <span>
+              Shots remaining: {Math.max(remainingShotCount, 0)}
+              {remainingShotCount < 0 && ` (remove ${Math.abs(remainingShotCount)} over-allocated)`}
+            </span>
+          </div>
+          <div className="manual-pair-header">
+            <span>Station</span>
+            <span>Report Pair</span>
+            <span>True Pair</span>
+          </div>
+          {stationPairCounts.map((station, stationIndex) => (
+            <div className="manual-pair-row" key={stationIndex}>
+              <strong>Station {stationIndex + 1}</strong>
+              {['reportPairs', 'truePairs'].map(pairType => (
+                <div className="manual-pair-control" key={pairType}>
+                  <button
+                    type="button"
+                    className="manual-pair-decrement"
+                    aria-label={`Remove ${pairType === 'reportPairs' ? 'report' : 'true'} pair from station ${stationIndex + 1}`}
+                    onClick={() => handlePairCountChange(stationIndex, pairType, -1)}
+                    disabled={station[pairType] === 0}
+                  >
+                    −
+                  </button>
+                  <span aria-live="polite">{station[pairType] * 2}</span>
+                  <button
+                    type="button"
+                    className="manual-pair-increment"
+                    aria-label={`Add ${pairType === 'reportPairs' ? 'report' : 'true'} pair to station ${stationIndex + 1}`}
+                    onClick={() => handlePairCountChange(stationIndex, pairType, 1)}
+                    disabled={assignedShotCount + 2 > totalShots}
+                  >
+                    +
+                  </button>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {hasFourLauncherStations && randomizeShots && (
         <div className="launcher-settings-container">
           <div className="launcher-setting">
             <div className="launcher-setting-heading">
@@ -267,7 +375,7 @@ const GameInfo = ({
         </div>
       )}
 
-      <div className="true-pairs-container">
+      {randomizeShots && <div className="true-pairs-container">
         <label className="true-pairs-label">True Pairs:</label>
         <div className="toggle-group">
           <input
@@ -309,10 +417,10 @@ const GameInfo = ({
             None
           </label>
         </div>
-      </div>
+      </div>}
 
       {/* Conditionally render the slider when the option is 'Random' */}
-      {truePairsOption === 'Random' && (
+      {randomizeShots && truePairsOption === 'Random' && (
         <div className="true-pair-weighting-container">
           <label htmlFor="truePairWeighting" className="true-pair-weighting-label">
             True Pair Random Weighting:
