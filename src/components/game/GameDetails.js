@@ -12,7 +12,6 @@ const encodeGameTemplate = (game) => {
     const template = {
         templateVersion: 1,
         location: game.location,
-        locationEmailAddress: game.locationEmailAddress || '',
         gameSetup: game.gameSetup,
         randomizeShots: game.randomizeShots,
         numStations: game.numStations,
@@ -629,10 +628,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     };
 
     const handleSaveTemplate = () => {
-        const encodedTemplate = encodeGameTemplate({
-            ...game,
-            locationEmailAddress: configuredLocation?.emailAddress || '',
-        });
+        const encodedTemplate = encodeGameTemplate(game);
         const url = new URL(window.location.href);
         url.search = '';
         url.hash = '';

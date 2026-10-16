@@ -1,17 +1,18 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-// import html2canvas from 'html2canvas';
 import GenericScorecard from './GenericScorecard';
 import StationNaming from './StationNaming'; 
 import StationGrid from './StationGrid';
 import './css/Scoreboard.css';
 import { clearSavedGameProgress } from './gameProgress';
 import locationConfiguration from '../../data/locations.json';
+import html2canvas from 'html2canvas';
 
 const Scoreboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isRenamingStations, setIsRenamingStations] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState('');
   const [localStationNames, setLocalStationNames] = useState(location.state?.game?.stationNames || []);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth); // State to track screen width
   const game = location.state?.game || { shooters: [] };
@@ -99,71 +100,36 @@ const Scoreboard = () => {
     }
   };
 
+  const handleDownloadResults = async () => {
+    const scorecard = screenshotRef.current;
+    if (!scorecard) return;
 
-  // Helper function to pad text to a fixed width with extra space
-  const padText = (text, width) => {
-    return text.toString().padEnd(width, ' ');
-  };
-
-  // Copy results to clipboard
-  const copyResults = () => {
-    let resultText = '';
-
-    // Add GenericScorecard content if available
-    if (allShootersFinished) {
-      resultText += 'Generic Scorecard:\n';
-      resultText += `Shots Distribution: ${JSON.stringify(shotsDistribution)}\n`;
-      resultText += `Station Names: ${JSON.stringify(stationNames)}\n`;
-      resultText += `True Pairs Matrix: ${JSON.stringify(truePairsMatrix)}\n\n`;
-    }
-
-    // Define column widths for clipboard (excluding removed columns)
-    const columnWidths = {
-      shooter: 30,
-      shotsTaken: 15,
-      numHits: 10,
-      longestStreak: 18,
-    };
-
-    // Add scoreboard header with extra space between columns
-    resultText += `${padText('Shooter', columnWidths.shooter)} ${padText('Shots Taken', columnWidths.shotsTaken)} ${padText('Num Hits', columnWidths.numHits)} ${padText('Longest Streak', columnWidths.longestStreak)}\n`;
-
-    // Add scoreboard rows
-    shooters.forEach(shooter => {
-      const totalShots = shooter.shotsTaken || 0;
-      const numHits = shooter.numHits || 0;
-
-      resultText += `${padText(shooter.name, columnWidths.shooter)} ${padText(totalShots, columnWidths.shotsTaken)} ${padText(numHits, columnWidths.numHits)} ${padText(shooter.maxStreak || 0, columnWidths.longestStreak)}\n`;
-    });
-
-    // Add hit/miss details with / for hit and O for miss, station names if provided
-    resultText += '\nHit/Miss Details:\n';
-    shooters.forEach(shooter => {
-      resultText += `${shooter.name}:\n`;
-      
-      // Collect hits/misses by station in the order they were shot
-      const stationResults = (shooter.shots || []).reduce((acc, shot) => {
-        const stationIndex = shot.station - 1; // Zero-based index for station names
-        const stationName = stationNames ? stationNames[stationIndex] : `Station ${shot.station}`;
-        acc[stationName] = acc[stationName] || [];
-        acc[stationName].push(shot.hit ? '/' : 'O');
-        return acc;
-      }, {});
-
-      // Format each station's results
-      Object.entries(stationResults).forEach(([stationName, results]) => {
-        resultText += `${stationName}: ${results.join(' ')}\n`;
+    setDownloadStatus('Preparing results...');
+    try {
+      const canvas = await html2canvas(scorecard, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        width: scorecard.scrollWidth,
+        height: scorecard.scrollHeight,
+        windowWidth: Math.max(document.documentElement.clientWidth, scorecard.scrollWidth),
+        ignoreElements: node => node.classList?.contains('station-progress'),
       });
-      
-      resultText += '\n';
-    });
-
-    navigator.clipboard.writeText(resultText).then(() => {
-      alert('Results copied to clipboard!');
-    }).catch(err => {
-      alert('Failed to copy results: ' + err);
-    });
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(result => result ? resolve(result) : reject(new Error('Unable to create results image.')), 'image/png');
+      });
+      const safeGameName = (game.name || 'game').replace(/[<>:"/\\|?*\x00-\x1F]/g, '_').trim();
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${safeGameName}-results.png`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 60000);
+      setDownloadStatus('Results downloaded.');
+    } catch (error) {
+      setDownloadStatus(`Unable to download results: ${error.message}`);
+    }
   };
+
 
   const handleStationNameChange = (index, newName) => {
     const updatedStationNames = [...localStationNames];
@@ -258,21 +224,6 @@ const Scoreboard = () => {
     && editingStationDetails?.birds > 2
   );
 
-  // const handleCapture = async () => {
-  //   if (screenshotRef.current) {
-  //     try {
-  //       const canvas = await html2canvas(screenshotRef.current);
-  //       const dataURL = canvas.toDataURL('image/png');
-  //       const link = document.createElement('a');
-  //       link.href = dataURL;
-  //       link.download = 'screenshot.png';
-  //       link.click();
-  //     } catch (err) {
-  //       console.error('Failed to capture screenshot:', err);
-  //     }
-  //   }
-  // };
-
   // Column names for different screen sizes
   const columnNames = screenWidth < 675 ? 
     ['Shooter', 'Hits', 'Max', 'Streaks', 'Action'] : 
@@ -284,7 +235,7 @@ const Scoreboard = () => {
 
   return (
     <div>
-      <div className="scoreboard" ref={screenshotRef}>
+      <div className="scoreboard">
         {isRenamingStations ? (
           <>
             <StationNaming
@@ -346,7 +297,7 @@ const Scoreboard = () => {
               </tbody>
             </table>
 
-            <div className="scorecard-container">
+            <div className="scorecard-container" ref={screenshotRef}>
               {allShootersFinished ? (
                 <div className="grid-container">
                   {shooters.map((shooter, index) => (
@@ -469,8 +420,13 @@ const Scoreboard = () => {
 
       {allShootersFinished ? (
         <div className="buttons-container">
-          <button onClick={copyResults} className="results-button">Copy Results</button>
-          {/* <button onClick={handleCapture} className="scoreboard-button">Copy Scoreboard</button> */}
+          <button
+            onClick={handleDownloadResults}
+            className="results-button"
+            disabled={downloadStatus === 'Preparing results...'}
+          >
+            {downloadStatus === 'Preparing results...' ? 'Preparing…' : 'Download Results'}
+          </button>
           <button onClick={handleEndGame} className="end-button">End Game</button>
         </div>
       ) : (
@@ -481,6 +437,7 @@ const Scoreboard = () => {
           </div>
         )
       )}
+      {downloadStatus && <p className="download-results-status" role="status">{downloadStatus}</p>}
     </div>
   );
 };
