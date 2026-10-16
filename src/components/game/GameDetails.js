@@ -134,7 +134,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     const [truePairsOption, setTruePairsOption] = useState('None');
 
     const [truePairWeighting, setTruePairWeighting] = useState(50);
-    const [randomizeShots, setRandomizeShots] = useState(true);
+    const [gameSetup, setGameSetup] = useState('Random');
     const [stationPairCounts, setStationPairCounts] = useState(() =>
         Array.from({ length: 7 }, () => ({ reportPairs: 0, truePairs: 0 }))
     );
@@ -155,6 +155,20 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     const [editingShotPair, setEditingShotPair] = useState(null);
     const [selectedCourses, setSelectedCourses] = useState({});
     const [selectedStations, setSelectedStations] = useState([]);
+
+    const handleGameSetupChange = (setup) => {
+        setGameSetup(setup);
+        if (setup === 'Quick') {
+            setMinShots(4);
+            setMaxShots(8);
+            setTruePairWeighting(50);
+            setSecondPairWeighting(50);
+            setAllowMixedPairs(allowAllPairs);
+        } else if (setup === 'Custom') {
+            setAllowAllPairs(false);
+            setAllowMixedPairs(false);
+        }
+    };
 
     useEffect(() => {
         setSelectedCourses(Object.fromEntries(availableCourses.map(course => [course.name, false])));
@@ -186,7 +200,35 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
 
     const handleAssignStations = () => {
         const selectedCoursesArray = availableCourses.filter(course => selectedCourses[course.name]);
-        if (randomizeStations(selectedCoursesArray)) setIsModalOpen(false);
+        const assignedStations = randomizeStations(selectedCoursesArray);
+        if (!assignedStations) return;
+
+        setIsModalOpen(false);
+        if (gameSetup !== 'Quick') return;
+
+        const updatedStationNames = assignedStations.map(station => station.name);
+        const stationDetails = assignedStations.map(station => ({
+            ...station,
+            configurationName: station.name,
+        }));
+        const launcherPairLabelsMatrix = createLauncherPairLabelsMatrix(
+            stationDetails,
+            game.shotsDistribution,
+            game.allowAllPairs,
+            game.allowMixedPairs,
+            game.secondPairWeighting
+        );
+        const updatedGame = {
+            ...game,
+            stationNames: updatedStationNames,
+            stationDetails,
+            launcherPairLabelsMatrix,
+        };
+
+        onUpdateGame(index, updatedGame);
+        setGame(updatedGame);
+        setStationNames(updatedStationNames);
+        setCurrentStep(4);
     };
 
     function randomizeStations(selectedCoursesArray) {
@@ -218,7 +260,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
         setSelectedStations(finalStations);
         setStationNames(finalStations.map(station => station.name));
         setErrorMessages([]);
-        return true;
+        return finalStations;
     }
 
     const handleStationNameChange = (stationIndex, stationName) => {
@@ -257,15 +299,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             if (totalShots <= 0) errors.push("Total shots must be greater than 0.");
             if (totalShots % 2 !== 0) errors.push("Total shots must be an even number.");
 
-            if (randomizeShots) {
-                if (minShots <= 0) errors.push("Minimum shots must be greater than 0.");
-                if (minShots % 2 !== 0) errors.push("Minimum shots must be an even number.");
-                if (maxShots <= 0) errors.push("Maximum shots must be greater than 0.");
-                if (maxShots % 2 !== 0) errors.push("Maximum shots must be an even number.");
-                if (minShots > maxShots) errors.push("Minimum shots cannot be greater than maximum shots.");
-                if (numStations * minShots > totalShots) errors.push("Total shots must allow for minimum shots per station.");
-                if (numStations * maxShots < totalShots) errors.push("Total shots must not exceed maximum shots per station.");
-            } else {
+            if (gameSetup === 'Custom') {
                 const assignedShots = stationPairCounts.reduce(
                     (total, station) => total + (station.reportPairs + station.truePairs) * 2,
                     0
@@ -275,6 +309,19 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                     errors.push(`Assign all shots before continuing. ${remainingShots} shots remain.`);
                 } else if (remainingShots < 0) {
                     errors.push(`Remove ${Math.abs(remainingShots)} over-allocated shots before continuing.`);
+                }
+            } else {
+                const effectiveMinShots = gameSetup === 'Quick' ? 4 : minShots;
+                const effectiveMaxShots = gameSetup === 'Quick' ? 8 : maxShots;
+                if (effectiveMinShots <= 0) errors.push("Minimum shots must be greater than 0.");
+                if (effectiveMinShots % 2 !== 0) errors.push("Minimum shots must be an even number.");
+                if (effectiveMaxShots <= 0) errors.push("Maximum shots must be greater than 0.");
+                if (effectiveMaxShots % 2 !== 0) errors.push("Maximum shots must be an even number.");
+                if (effectiveMinShots > effectiveMaxShots) errors.push("Minimum shots cannot be greater than maximum shots.");
+                if (numStations * effectiveMinShots > totalShots) errors.push("Total shots must allow for minimum shots per station.");
+                if (numStations * effectiveMaxShots < totalShots) errors.push("Total shots must not exceed maximum shots per station.");
+                if (gameSetup === 'Quick' && !configuredLocation) {
+                    errors.push("Quick setup requires a location with configured courses.");
                 }
             }
         }
@@ -332,14 +379,20 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
         let shotsDistribution;
         let truePairsMatrix;
 
-        if (randomizeShots) {
+        const effectiveMinShots = gameSetup === 'Quick' ? 4 : parseInt(minShots, 10);
+        const effectiveMaxShots = gameSetup === 'Quick' ? 8 : parseInt(maxShots, 10);
+        const effectiveTruePairWeighting = gameSetup === 'Quick' ? 50 : truePairWeighting;
+        const effectiveSecondPairWeighting = gameSetup === 'Quick' ? 50 : secondPairWeighting;
+        const effectiveAllowMixedPairs = gameSetup === 'Quick' ? allowAllPairs : allowMixedPairs;
+
+        if (gameSetup !== 'Custom') {
             shotsDistribution = distributeShots(
                 parseInt(numStations, 10),
-                parseInt(minShots, 10),
-                parseInt(maxShots, 10),
+                effectiveMinShots,
+                effectiveMaxShots,
                 parseInt(totalShots, 10)
             );
-            truePairsMatrix = generateTruePairsMatrix(shotsDistribution, truePairsOption, truePairWeighting);
+            truePairsMatrix = generateTruePairsMatrix(shotsDistribution, truePairsOption, effectiveTruePairWeighting);
         } else {
             shotsDistribution = stationPairCounts.map(station => (station.reportPairs + station.truePairs) * 2);
             truePairsMatrix = stationPairCounts.map(station => [
@@ -354,19 +407,25 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             minShots: parseInt(minShots, 10),
             maxShots: parseInt(maxShots, 10),
             totalShots: parseInt(totalShots, 10),
-            randomizeShots,
+            gameSetup,
+            randomizeShots: gameSetup !== 'Custom',
             stationPairCounts,
             shotsDistribution,
             truePairsMatrix,
             truePairsOption,
-            truePairWeighting,
+            truePairWeighting: effectiveTruePairWeighting,
             allowAllPairs,
-            allowMixedPairs,
-            secondPairWeighting,
+            allowMixedPairs: effectiveAllowMixedPairs,
+            secondPairWeighting: effectiveSecondPairWeighting,
         };
         onUpdateGame(index, updatedGame);
         setGame(updatedGame);
-        handleNextStep();
+        if (gameSetup === 'Quick') {
+            setErrorMessages([]);
+            setIsModalOpen(true);
+        } else {
+            handleNextStep();
+        }
     };
 
     const handlePreparePreview = () => {
@@ -534,8 +593,8 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                     setMaxShots={setMaxShots}
                     totalShots={totalShots}
                     setTotalShots={setTotalShots}
-                    randomizeShots={randomizeShots}
-                    setRandomizeShots={setRandomizeShots}
+                    gameSetup={gameSetup}
+                    onGameSetupChange={handleGameSetupChange}
                     stationPairCounts={stationPairCounts}
                     setStationPairCounts={setStationPairCounts}
                     truePairsOption={truePairsOption}

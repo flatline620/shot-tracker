@@ -10,8 +10,8 @@ const GameInfo = ({
   setMaxShots,
   totalShots,
   setTotalShots,
-  randomizeShots,
-  setRandomizeShots,
+  gameSetup,
+  onGameSetupChange,
   stationPairCounts,
   setStationPairCounts,
   truePairsOption,
@@ -36,7 +36,7 @@ const GameInfo = ({
       currentCounts[index] || { reportPairs: 0, truePairs: 0 }
     ));
 
-    if (randomizeShots) validateTotalShots(value, minShots, maxShots);
+    if (gameSetup !== 'Custom') validateTotalShots(value, minShots, maxShots);
   };
 
   const handleMinShotsChange = (e) => {
@@ -65,7 +65,7 @@ const GameInfo = ({
 
   const handleTotalShotsChange = (e) => {
     const value = Number(e.target.value);
-    if (randomizeShots) {
+    if (gameSetup !== 'Custom') {
       updateTotalShots(numStations, minShots, maxShots, value);
     } else {
       setTotalShots(value);
@@ -121,30 +121,35 @@ const GameInfo = ({
       <h2>Game Info</h2>
 
       <div className="randomize-shots-setting">
-        <label className="true-pairs-label">Randomize Shots:</label>
-        <div className="toggle-group" role="radiogroup" aria-label="Randomize Shots">
+        <label className="true-pairs-label">Game Setup:</label>
+        <div className="toggle-group" role="radiogroup" aria-label="Game Setup">
           <input
             type="radio"
-            id="randomizeShotsYes"
-            name="randomizeShots"
-            checked={randomizeShots}
-            onChange={() => setRandomizeShots(true)}
+            id="gameSetupRandom"
+            name="gameSetup"
+            checked={gameSetup === 'Random'}
+            onChange={() => onGameSetupChange('Random')}
             className="toggle-button"
           />
-          <label htmlFor="randomizeShotsYes" className={`toggle-button-label ${randomizeShots ? 'active' : ''}`}>Yes</label>
+          <label htmlFor="gameSetupRandom" className={`toggle-button-label ${gameSetup === 'Random' ? 'active' : ''}`}>Random</label>
           <input
             type="radio"
-            id="randomizeShotsNo"
-            name="randomizeShots"
-            checked={!randomizeShots}
-            onChange={() => {
-              setRandomizeShots(false);
-              setAllowAllPairs(false);
-              setAllowMixedPairs(false);
-            }}
+            id="gameSetupCustom"
+            name="gameSetup"
+            checked={gameSetup === 'Custom'}
+            onChange={() => onGameSetupChange('Custom')}
             className="toggle-button"
           />
-          <label htmlFor="randomizeShotsNo" className={`toggle-button-label ${!randomizeShots ? 'active' : ''}`}>No</label>
+          <label htmlFor="gameSetupCustom" className={`toggle-button-label ${gameSetup === 'Custom' ? 'active' : ''}`}>Custom</label>
+          <input
+            type="radio"
+            id="gameSetupQuick"
+            name="gameSetup"
+            checked={gameSetup === 'Quick'}
+            onChange={() => onGameSetupChange('Quick')}
+            className="toggle-button"
+          />
+          <label htmlFor="gameSetupQuick" className={`toggle-button-label ${gameSetup === 'Quick' ? 'active' : ''}`}>Quick</label>
         </div>
       </div>
 
@@ -162,7 +167,7 @@ const GameInfo = ({
         <span>{numStations}</span>
       </div>
 
-        {randomizeShots && (
+        {gameSetup === 'Random' && (
           <div className="form-row">
             <label htmlFor="minShots">Min Shots per Station:</label>
             <input
@@ -178,7 +183,7 @@ const GameInfo = ({
           </div>
         )}
 
-        {randomizeShots && (
+        {gameSetup === 'Random' && (
           <div className="form-row">
             <label htmlFor="maxShots">Max Shots per Station:</label>
             <input
@@ -209,7 +214,7 @@ const GameInfo = ({
         </div>
       </form>
 
-      {!randomizeShots && (
+      {gameSetup === 'Custom' && (
         <div className="manual-pair-allocation">
           <div className="manual-pair-summary">
             <strong>Shot Allocation</strong>
@@ -254,7 +259,7 @@ const GameInfo = ({
         </div>
       )}
 
-      {hasFourLauncherStations && randomizeShots && (
+      {hasFourLauncherStations && gameSetup !== 'Custom' && (
         <div className="launcher-settings-container">
           <div className="launcher-setting">
             <div className="launcher-setting-heading">
@@ -297,7 +302,7 @@ const GameInfo = ({
             </div>
           </div>
 
-          {allowAllPairs && (
+          {gameSetup === 'Random' && allowAllPairs && (
             <>
               <div className="launcher-setting">
                 <div className="launcher-setting-heading">
@@ -375,7 +380,7 @@ const GameInfo = ({
         </div>
       )}
 
-      {randomizeShots && <div className="true-pairs-container">
+      {gameSetup !== 'Custom' && <div className="true-pairs-container">
         <label className="true-pairs-label">True Pairs:</label>
         <div className="toggle-group">
           <input
@@ -420,7 +425,7 @@ const GameInfo = ({
       </div>}
 
       {/* Conditionally render the slider when the option is 'Random' */}
-      {randomizeShots && truePairsOption === 'Random' && (
+      {gameSetup === 'Random' && truePairsOption === 'Random' && (
         <div className="true-pair-weighting-container">
           <label htmlFor="truePairWeighting" className="true-pair-weighting-label">
             True Pair Random Weighting:
