@@ -58,6 +58,31 @@ const createLauncherLabels = (birdCount, numberingScheme) =>
         numberingScheme === 'Letters' ? String.fromCharCode(65 + index) : String(index + 1)
     );
 
+const createLauncherPairLabelsMatrix = (stationDetails, shotsDistribution, truePairsMatrix, allowAllPairs, allowMixedPairs, secondPairWeighting) =>
+    stationDetails.map((station, stationIndex) => {
+        const shotCount = shotsDistribution[stationIndex] || 0;
+        const alternatePair = station.launchers?.slice(2, 4).join('/');
+        const launcherPairLabels = Array(shotCount).fill('');
+
+        if (!allowAllPairs || station.birds <= 2 || !alternatePair) return launcherPairLabels;
+
+        if (Math.random() < secondPairWeighting / 100) launcherPairLabels.fill(alternatePair);
+
+        if (allowMixedPairs) {
+            for (let shotIndex = 0; shotIndex + 1 < shotCount; shotIndex += 2) {
+                const isTruePair = truePairsMatrix[stationIndex]?.[shotIndex]
+                    && truePairsMatrix[stationIndex]?.[shotIndex + 1];
+                if (!isTruePair || Math.random() >= 0.5) continue;
+
+                const alternatePairFirst = Math.random() < 0.5;
+                launcherPairLabels[shotIndex] = alternatePairFirst ? alternatePair : '';
+                launcherPairLabels[shotIndex + 1] = alternatePairFirst ? '' : alternatePair;
+            }
+        }
+
+        return launcherPairLabels;
+    });
+
 const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -71,6 +96,11 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
         configured => configured.name.trim().toLowerCase() === location.trim().toLowerCase()
     );
     const availableCourses = configuredLocation?.courses || [];
+    const hasFourLauncherStations = availableCourses.some(course =>
+        course.stations.some(station => station.birds > 2)
+    );
+    const alternateLauncherPairName = configuredLocation?.launcherNumberingScheme === 'Letters' ? 'C/D' : '3/4';
+    const standardLauncherPairName = configuredLocation?.launcherNumberingScheme === 'Letters' ? 'A/B' : '1/2';
 
     const [numStations, setNumStations] = useState(game.numStations || '');
     const [minShots, setMinShots] = useState(game.minShots || '');
@@ -87,6 +117,9 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
     const [truePairsOption, setTruePairsOption] = useState('None');
 
     const [truePairWeighting, setTruePairWeighting] = useState(50);
+    const [secondPairWeighting, setSecondPairWeighting] = useState(50);
+    const [allowAllPairs, setAllowAllPairs] = useState(false);
+    const [allowMixedPairs, setAllowMixedPairs] = useState(false);
 
     // State for Rotate Shooters
     const [rotateShooters, setRotateShooters] = useState(true); // Default to true
@@ -264,6 +297,9 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             truePairsMatrix,
             truePairsOption,
             truePairWeighting,
+            allowAllPairs,
+            allowMixedPairs,
+            secondPairWeighting,
         };
         onUpdateGame(index, updatedGame);
         setGame(updatedGame);
@@ -278,11 +314,20 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             ...station,
             name: updatedStationNames[index],
         }));
+        const launcherPairLabelsMatrix = createLauncherPairLabelsMatrix(
+            stationDetails,
+            game.shotsDistribution,
+            game.truePairsMatrix,
+            game.allowAllPairs,
+            game.allowMixedPairs,
+            game.secondPairWeighting
+        );
 
         const updatedGame = {
             ...game,
             stationNames: updatedStationNames,
             stationDetails,
+            launcherPairLabelsMatrix,
         };
         onUpdateGame(index, updatedGame);
         setGame(updatedGame);
@@ -360,6 +405,15 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
                     setTruePairsOption={setTruePairsOption}
                     truePairWeighting={truePairWeighting}
                     setTruePairWeighting={setTruePairWeighting}
+                    hasFourLauncherStations={hasFourLauncherStations}
+                    alternateLauncherPairName={alternateLauncherPairName}
+                    allowAllPairs={allowAllPairs}
+                    setAllowAllPairs={setAllowAllPairs}
+                    allowMixedPairs={allowMixedPairs}
+                    setAllowMixedPairs={setAllowMixedPairs}
+                    secondPairWeighting={secondPairWeighting}
+                    setSecondPairWeighting={setSecondPairWeighting}
+                    standardLauncherPairName={standardLauncherPairName}
                 />
             )}
 

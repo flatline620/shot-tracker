@@ -66,6 +66,34 @@
     justify-content: center;
     align-items: center;
   }
+
+  .recorded-shots-shot .shot-result {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .recorded-shots-shot .shot-annotations {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .recorded-shots-shot .launcher-pair-label,
+  .recorded-shots-shot .tp-label {
+    position: absolute;
+    bottom: 2px;
+    font-size: 10.5px;
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  .recorded-shots-shot .launcher-pair-label {
+    left: 2px;
+  }
+
+  .recorded-shots-shot .tp-label {
+    right: 2px;
+  }
   
   .recorded-shots-shot.hit {
     background-color: green;
@@ -79,4 +107,13 @@
   
   .recorded-shots-shot.empty {
     background-color: lightgrey;
+  }
+
+  .recorded-shots-shot.true-pair {
+    background-color: lightgrey;
+    color: #333;
+  }
+
+  .recorded-shots-shot.true-pair .tp-label {
+    color: #333;
   }

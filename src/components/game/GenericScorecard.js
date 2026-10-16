@@ -1,7 +1,7 @@
 import React from 'react';
 import './css/GenericScorecard.css'; // Import CSS
 
-const GenericScorecard = ({ shotsDistribution, stationNames, truePairsMatrix, stationStatuses }) => {
+const GenericScorecard = ({ shotsDistribution, stationNames, truePairsMatrix, stationStatuses, launcherPairLabelsMatrix }) => {
   return (
     <div>
       <h2>Scorecard</h2>
@@ -16,12 +16,18 @@ const GenericScorecard = ({ shotsDistribution, stationNames, truePairsMatrix, st
           <div className="generic-scorecard-station-grid">
             {Array.from({ length: shotsAtStation }).map((_, shotIndex) => {
               const isTruePair = truePairsMatrix[stationIndex]?.[shotIndex] || false;
+              const launcherPairLabel = launcherPairLabelsMatrix[stationIndex]?.[shotIndex];
               return (
                 <div
                   key={shotIndex}
                   className={`shot-placeholder ${isTruePair ? 'true-pair' : ''}`}
                 >
-                  {isTruePair ? 'TP' : ''}
+                  {(isTruePair || launcherPairLabel) && (
+                    <span className="shot-annotations">
+                      {isTruePair && <span className="tp-label">TP</span>}
+                      {launcherPairLabel && <span className="launcher-pair-label">{launcherPairLabel}</span>}
+                    </span>
+                  )}
                 </div>
               );
             })}

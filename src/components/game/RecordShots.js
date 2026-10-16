@@ -14,6 +14,7 @@ const RecordShots = () => {
 
   const initialShots = game.shotsDistribution || [];
   const truePairsMatrix = game.truePairsMatrix || [];
+  const launcherPairLabelsMatrix = game.launcherPairLabelsMatrix || [];
   const rotateShooters = game.rotateShooters || false;
 
   const [shots, setShots] = useState(shooter.shots || []);
@@ -198,12 +199,20 @@ const RecordShots = () => {
         {Array.from({ length: initialShots[stationIndex] }).map((_, shotIndex) => {
           const shot = shotsForStation.find(s => s.shotIndex === shotIndex);
           const isTruePair = truePairsMatrix[stationIndex][shotIndex] || false;
+          const launcherPairLabel = launcherPairLabelsMatrix[stationIndex]?.[shotIndex];
           return (
             <button
               key={shotIndex}
               className={`shot ${shot ? (shot.hit ? 'hit' : 'miss') : isTruePair ? 'true-pair' : 'empty'}`}
             >
-              {shot ? (shot.hit ? '/' : 'O') : isTruePair ? 'TP' : '-'}
+              {shot && <span className="shot-result">{shot.hit ? '/' : 'O'}</span>}
+              {(isTruePair || launcherPairLabel) && (
+                <span className="shot-annotations">
+                  {isTruePair && <span className="tp-label">TP</span>}
+                  {launcherPairLabel && <span className="launcher-pair-label">{launcherPairLabel}</span>}
+                </span>
+              )}
+              {!shot && !isTruePair && !launcherPairLabel && '-'}
             </button>
           );
         })}
@@ -275,6 +284,7 @@ const RecordShots = () => {
         stationNames={stationNames}
         initialShots={initialShots}
         truePairsMatrix={truePairsMatrix}
+        launcherPairLabelsMatrix={launcherPairLabelsMatrix}
       />
 
     </div>

@@ -2,7 +2,7 @@
   "locations": [
     {
       "name": "TBSC",
-      "launcherNumberingScheme": "Numbers",
+      "launcherNumberingScheme": "Letters",
       "courses": [
         {
           "name": "Green",
@@ -32,20 +32,20 @@
         },
         {
           "name": "Pink",
-          "difficulty": "Novice",
+          "difficulty": "Intermediate",
           "stations": [
             { "name": "Pink 1", "birds": 2 },
             { "name": "Pink 2", "birds": 2 },
             { "name": "Pink 3", "birds": 2 },
             { "name": "Pink 4", "birds": 2 },
-            { "name": "Pink 5", "birds": 2 },
+            { "name": "Pink 5", "birds": 4 },
             { "name": "Pink 6", "birds": 2 },
             { "name": "Pink 7", "birds": 2 }
           ]
         },
         {
           "name": "Black",
-          "difficulty": "Novice",
+          "difficulty": "Intermediate",
           "stations": [
             { "name": "Black 1", "birds": 2 },
             { "name": "Black 2", "birds": 2 },
@@ -58,7 +58,7 @@
         },
         {
           "name": "Red",
-          "difficulty": "Novice",
+          "difficulty": "Intermediate",
           "stations": [
             { "name": "Red 1", "birds": 2 },
             { "name": "Red 2", "birds": 2 },
@@ -71,20 +71,20 @@
         },
         {
           "name": "Yellow",
-          "difficulty": "Novice",
+          "difficulty": "Difficult",
           "stations": [
-            { "name": "Yellow 1", "birds": 2 },
-            { "name": "Yellow 2", "birds": 2 },
-            { "name": "Yellow 3", "birds": 2 },
-            { "name": "Yellow 4", "birds": 2 },
-            { "name": "Yellow 5", "birds": 2 },
-            { "name": "Yellow 6", "birds": 2 },
-            { "name": "Yellow 7", "birds": 2 }
+            { "name": "Yellow 1", "birds": 4 },
+            { "name": "Yellow 2", "birds": 4 },
+            { "name": "Yellow 3", "birds": 4 },
+            { "name": "Yellow 4", "birds": 4 },
+            { "name": "Yellow 5", "birds": 4 },
+            { "name": "Yellow 6", "birds": 4 },
+            { "name": "Yellow 7", "birds": 4 }
           ]
         },
         {
           "name": "Purple",
-          "difficulty": "Novice",
+          "difficulty": "Expert",
           "stations": [
             { "name": "Purple 1", "birds": 2 },
             { "name": "Purple 2", "birds": 2 },
@@ -97,15 +97,15 @@
         },
         {
           "name": "Blue",
-          "difficulty": "Novice",
+          "difficulty": "Difficult",
           "stations": [
-            { "name": "Blue 1", "birds": 2 },
-            { "name": "Blue 2", "birds": 2 },
-            { "name": "Blue 3", "birds": 2 },
-            { "name": "Blue 4", "birds": 2 },
-            { "name": "Blue 5", "birds": 2 },
-            { "name": "Blue 6", "birds": 2 },
-            { "name": "Blue 7", "birds": 2 }
+            { "name": "Blue 1", "birds": 4 },
+            { "name": "Blue 2", "birds": 4 },
+            { "name": "Blue 3", "birds": 4 },
+            { "name": "Blue 4", "birds": 4 },
+            { "name": "Blue 5", "birds": 4 },
+            { "name": "Blue 6", "birds": 4 },
+            { "name": "Blue 7", "birds": 4 }
           ]
         }
       ]

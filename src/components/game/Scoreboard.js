@@ -35,6 +35,7 @@ const Scoreboard = () => {
   }
 
   const { shooters, shotsDistribution, stationNames, truePairsMatrix } = game;
+  const launcherPairLabelsMatrix = game.launcherPairLabelsMatrix || [];
 
   const handleRecordShots = (shooter) => {
     navigate('/record-shots', { state: { game, shooter } });
@@ -262,13 +263,23 @@ const Scoreboard = () => {
                           const shotsForStation = (shooter.shots || []).filter(shot => shot.station === stationIndex + 1);
                           return (
                             <>
-                              {shotsForStation.map((shot, shotIndex) => (
-                                <div key={shotIndex} className={`shot ${shot.hit ? 'hit' : 'miss'}`}>
-                                  {truePairsMatrix[stationIndex]?.[shotIndex] ? (
-                                    <span className="tp-label">TP</span>
-                                  ) : ''}
-                                </div>
-                              ))}
+                              {Array.from({ length: shotsDistribution[stationIndex] }).map((_, shotIndex) => {
+                                const shot = shotsForStation.find(recordedShot => recordedShot.shotIndex === shotIndex);
+                                const isTruePair = truePairsMatrix[stationIndex]?.[shotIndex];
+                                const launcherPairLabel = launcherPairLabelsMatrix[stationIndex]?.[shotIndex];
+
+                                return (
+                                  <div key={shotIndex} className={`shot ${shot ? (shot.hit ? 'hit' : 'miss') : 'empty'}`}>
+                                    {shot && <span className="shot-result">{shot.hit ? '/' : 'O'}</span>}
+                                    {(isTruePair || launcherPairLabel) && (
+                                      <span className="shot-annotations">
+                                        {isTruePair && <span className="tp-label">TP</span>}
+                                        {launcherPairLabel && <span className="launcher-pair-label">{launcherPairLabel}</span>}
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              })}
                             </>
                           );
                         }}
@@ -282,6 +293,7 @@ const Scoreboard = () => {
                   stationNames={stationNames}
                   truePairsMatrix={truePairsMatrix}
                   stationStatuses={stationStatuses}
+                  launcherPairLabelsMatrix={launcherPairLabelsMatrix}
                 />
               )}
             </div>

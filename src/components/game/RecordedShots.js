@@ -1,7 +1,7 @@
 import React from 'react';
 import './css/RecordedShots.css'; 
 
-const RecordedShots = ({ stationShots, stationNames, initialShots, truePairsMatrix }) => {
+const RecordedShots = ({ stationShots, stationNames, initialShots, truePairsMatrix, launcherPairLabelsMatrix }) => {
     const renderRecordShots = (stationIndex) => {
         const shotsForStation = stationShots[stationIndex];
         return (
@@ -9,12 +9,20 @@ const RecordedShots = ({ stationShots, stationNames, initialShots, truePairsMatr
             {Array.from({ length: initialShots[stationIndex] }).map((_, shotIndex) => {
               const shot = shotsForStation.find(s => s.shotIndex === shotIndex);
               const isTruePair = truePairsMatrix[stationIndex][shotIndex] || false;
+              const launcherPairLabel = launcherPairLabelsMatrix[stationIndex]?.[shotIndex];
               return (
                 <button
                   key={shotIndex}
                   className={`recorded-shots-shot ${shot ? (shot.hit ? 'hit' : 'miss') : isTruePair ? 'true-pair' : 'empty'}`}
                 >
-                  {shot ? (shot.hit ? '/' : 'O') : isTruePair ? 'TP' : '-'}
+                  {shot && <span className="shot-result">{shot.hit ? '/' : 'O'}</span>}
+                  {(isTruePair || launcherPairLabel) && (
+                    <span className="shot-annotations">
+                      {isTruePair && <span className="tp-label">TP</span>}
+                      {launcherPairLabel && <span className="launcher-pair-label">{launcherPairLabel}</span>}
+                    </span>
+                  )}
+                  {!shot && !isTruePair && !launcherPairLabel && '-'}
                 </button>
               );
             })}

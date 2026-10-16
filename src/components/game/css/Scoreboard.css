@@ -125,7 +125,46 @@
   }
 
   .tp-label {
-    position: absolute; /* Absolute positioning within the shot div */
-    color: white; /* Example color for TP label */
-    font-size: 12px; /* Adjust size as needed */
+    color: white;
+    font-size: 10.5px;
+  }
+
+  .shot-result {
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .shot-annotations {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .shot.empty .shot-annotations {
+    color: #333;
+  }
+
+  .shot .launcher-pair-label,
+  .shot .tp-label {
+    position: absolute;
+    bottom: 2px;
+    font-size: 10.5px;
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  .shot .launcher-pair-label {
+    left: 2px;
+  }
+
+  .shot .tp-label {
+    right: 2px;
+  }
+
+  .shot.empty .tp-label {
+    color: #333;
+  }
+
+  .launcher-pair-label {
+    font-size: 10.5px;
   }

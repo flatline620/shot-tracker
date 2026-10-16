@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './css/GameInfo.css'; // Ensure the correct path to the CSS file
 
 const GameInfo = ({
@@ -13,8 +13,18 @@ const GameInfo = ({
   truePairsOption,
   setTruePairsOption,
   truePairWeighting,
-  setTruePairWeighting
+  setTruePairWeighting,
+  hasFourLauncherStations,
+  alternateLauncherPairName,
+  standardLauncherPairName,
+  allowAllPairs,
+  setAllowAllPairs,
+  allowMixedPairs,
+  setAllowMixedPairs,
+  secondPairWeighting,
+  setSecondPairWeighting
 }) => {
+  const [activeHelp, setActiveHelp] = useState(null);
   const handleNumStationsChange = (e) => {
     setNumStations(e.target.value);
     
@@ -135,6 +145,127 @@ const GameInfo = ({
           <span>{totalShots}</span>
         </div>
       </form>
+
+      {hasFourLauncherStations && (
+        <div className="launcher-settings-container">
+          <div className="launcher-setting">
+            <div className="launcher-setting-heading">
+              <label className="true-pairs-label">Allow All Pairs:</label>
+              <button
+                type="button"
+                className="launcher-help-button"
+                aria-label="Allow All Pairs information"
+                title="Allow All Pairs information"
+                onClick={() => setActiveHelp({
+                  title: 'Allow All Pairs',
+                  message: 'This location has stations that have more than 2 launchers for at least one station. Choosing Yes will indicate that all launchers should be available for assignment.',
+                })}
+              >
+                ℹ️
+              </button>
+            </div>
+            <div className="toggle-group" role="radiogroup" aria-label="Allow All Pairs">
+              <input
+                type="radio"
+                id="allowAllPairsYes"
+                name="allowAllPairs"
+                checked={allowAllPairs}
+                onChange={() => setAllowAllPairs(true)}
+                className="toggle-button"
+              />
+              <label htmlFor="allowAllPairsYes" className={`toggle-button-label ${allowAllPairs ? 'active' : ''}`}>Yes</label>
+              <input
+                type="radio"
+                id="allowAllPairsNo"
+                name="allowAllPairs"
+                checked={!allowAllPairs}
+                onChange={() => {
+                  setAllowAllPairs(false);
+                  setAllowMixedPairs(false);
+                }}
+                className="toggle-button"
+              />
+              <label htmlFor="allowAllPairsNo" className={`toggle-button-label ${!allowAllPairs ? 'active' : ''}`}>No</label>
+            </div>
+          </div>
+
+          {allowAllPairs && (
+            <>
+              <div className="launcher-setting">
+                <div className="launcher-setting-heading">
+                  <label className="true-pairs-label">Allow Mixed Pairs:</label>
+                  <button
+                    type="button"
+                    className="launcher-help-button"
+                    aria-label="Allow Mixed Pairs information"
+                    title="Allow Mixed Pairs information"
+                    onClick={() => setActiveHelp({
+                      title: 'Allow Mixed Pairs',
+                      message: `Selecting this can result in a station that has both ${standardLauncherPairName} and ${alternateLauncherPairName} pairs to shoot.`,
+                    })}
+                  >
+                    ℹ️
+                  </button>
+                </div>
+                <div className="toggle-group" role="radiogroup" aria-label="Allow Mixed Pairs">
+                  <input
+                    type="radio"
+                    id="allowMixedPairsYes"
+                    name="allowMixedPairs"
+                    checked={allowMixedPairs}
+                    onChange={() => setAllowMixedPairs(true)}
+                    className="toggle-button"
+                  />
+                  <label htmlFor="allowMixedPairsYes" className={`toggle-button-label ${allowMixedPairs ? 'active' : ''}`}>Yes</label>
+                  <input
+                    type="radio"
+                    id="allowMixedPairsNo"
+                    name="allowMixedPairs"
+                    checked={!allowMixedPairs}
+                    onChange={() => setAllowMixedPairs(false)}
+                    className="toggle-button"
+                  />
+                  <label htmlFor="allowMixedPairsNo" className={`toggle-button-label ${!allowMixedPairs ? 'active' : ''}`}>No</label>
+                </div>
+              </div>
+
+              <div className="true-pair-weighting-container">
+                <label htmlFor="secondPairWeighting" className="true-pair-weighting-label">
+                  Second Pair Weighting:
+                </label>
+                <input
+                  id="secondPairWeighting"
+                  type="range"
+                  min="1"
+                  max="100"
+                  value={secondPairWeighting}
+                  onChange={(e) => setSecondPairWeighting(Number(e.target.value))}
+                  className="true-pair-weighting-slider"
+                />
+                <span>{secondPairWeighting}</span>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {activeHelp && (
+        <div className="launcher-info-backdrop" role="presentation" onClick={() => setActiveHelp(null)}>
+          <div
+            className="launcher-info-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="launcher-info-title"
+            onClick={event => event.stopPropagation()}
+          >
+            <button type="button" className="launcher-info-close" onClick={() => setActiveHelp(null)} aria-label="Close information">
+              &times;
+            </button>
+            <h3 id="launcher-info-title">{activeHelp.title}</h3>
+            <p>{activeHelp.message}</p>
+          </div>
+        </div>
+      )}
 
       <div className="true-pairs-container">
         <label className="true-pairs-label">True Pairs:</label>

@@ -81,11 +81,51 @@
 
 
 .shot {
+  position: relative;
   width: 40px;
   height: 40px;
   border: none;
   border-radius: 5px;
   cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shot-result {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.shot-annotations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.launcher-pair-label,
+.tp-label {
+  position: absolute;
+  bottom: 2px;
+  font-size: 10.5px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.launcher-pair-label {
+  left: 2px;
+}
+
+.tp-label {
+  right: 2px;
+}
+
+.shot.true-pair .shot-annotations {
+  color: #333;
+}
+
+.shot.true-pair .tp-label {
+  color: #333;
 }
 
 .shot.hit {
