@@ -79,6 +79,19 @@
   border-bottom-right-radius: 25px;
 }
 
+.game-form .form-row {
+  width: 100%;
+}
+
+.game-form .form-row input[type="range"] {
+  flex: 0 0 200px;
+}
+
+.game-form .form-row > span {
+  flex: 0 0 24px;
+  text-align: right;
+}
+
 .randomize-shots-setting {
   display: flex;
   flex-direction: column;
@@ -163,6 +176,38 @@
   opacity: 0.6;
 }
 
+.true-pair-weighting-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.true-pairs-container + .true-pair-weighting-container {
+  margin-top: 16px;
+}
+
+.true-pair-weighting-label {
+  flex: 1;
+}
+
+.true-pair-weighting-slider {
+  flex: 0 0 125px;
+  width: 125px;
+  padding: 5px;
+  border: 1px solid #ccc;
+}
+
+.true-pair-weighting-slider + span {
+  flex: 0 0 24px;
+}
+
+.true-pair-weighting-container > span {
+  min-width: 24px;
+  text-align: right;
+}
+
 .launcher-settings-container {
   display: grid;
   gap: 16px;
@@ -180,6 +225,11 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.launcher-setting-heading .true-pairs-label {
+  width: 170px;
+  white-space: nowrap;
 }
 
 .launcher-setting .toggle-group {

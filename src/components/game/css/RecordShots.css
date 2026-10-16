@@ -8,6 +8,10 @@
   font-size: 16px;
 }
 
+.station-select {
+  margin-left: 8px;
+}
+
 .button-container {
   margin: 0;
   display: flex;
@@ -114,6 +118,8 @@
 
 .launcher-pair-label {
   left: 2px;
+  top: 2px;
+  bottom: auto;
 }
 
 .tp-label {
@@ -187,6 +193,8 @@
 .selected-station-preview .record-shots-station-grid {
   display: grid;
   gap: 5px;
-  justify-content: center; /* Center the grid horizontally */
+  justify-content: start;
+  width: max-content;
+  max-width: 100%;
   margin: 0 auto; /* Center the grid horizontally */
 }

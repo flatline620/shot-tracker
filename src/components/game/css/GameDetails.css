@@ -186,6 +186,8 @@
 
 .station-edit-launcher-label {
   left: 2px;
+  top: 2px;
+  bottom: auto;
 }
 
 .station-edit-true-pair-label {

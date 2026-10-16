@@ -2,6 +2,9 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
   }
   
   .recorded-shots-grid {
@@ -40,11 +43,13 @@
   .recorded-shots-row {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
   }
 
   .recorded-shots-station-name {
-    width: 120px; /* Adjust width as needed */
-    text-align: right;
+    flex: 0 0 120px;
+    width: 120px;
+    text-align: left;
     margin-right: 10px;
     font-size: 16px;
     font-weight: bold;
@@ -89,6 +94,8 @@
 
   .recorded-shots-shot .launcher-pair-label {
     left: 2px;
+    top: 2px;
+    bottom: auto;
   }
 
   .recorded-shots-shot .tp-label {

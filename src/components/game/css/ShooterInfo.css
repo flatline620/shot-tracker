@@ -42,14 +42,15 @@
   }
   
   .shooters-section .remove-button {
-    flex: 0 0 auto;
+    flex: 0 0 132px;
     margin-left: auto;
     padding: 5px 10px; /* Adjust padding for consistency */
     border: none;
     background-color: red; /* Button color */
     color: white;
     cursor: pointer;
-    width: auto;
+    width: 132px;
+    height: 36px;
   }
   
   .shooters-section .remove-button:hover {
@@ -130,13 +131,15 @@
   }
   
   .input-row button {
+    flex: 0 0 132px;
+    width: 132px;
+    height: 36px;
     padding: 5px 10px; /* Consistent padding with inputs */
     border: none;
     background-color: blue; /* Button color */
     color: white;
     cursor: pointer;
-    margin-left: 50px;
-    flex-grow: 1; /* Allow buttons to grow evenly */
+    margin-left: 0;
   }
   
   .input-row button.disabled {

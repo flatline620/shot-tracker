@@ -169,7 +169,7 @@ const GameInfo = ({
 
         {gameSetup === 'Random' && (
           <div className="form-row">
-            <label htmlFor="minShots">Min Shots per Station:</label>
+            <label htmlFor="minShots">Min Shots/Station:</label>
             <input
               id="minShots"
               type="range"
@@ -185,7 +185,7 @@ const GameInfo = ({
 
         {gameSetup === 'Random' && (
           <div className="form-row">
-            <label htmlFor="maxShots">Max Shots per Station:</label>
+            <label htmlFor="maxShots">Max Shots/Station:</label>
             <input
               id="maxShots"
               type="range"

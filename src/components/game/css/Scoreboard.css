@@ -155,6 +155,8 @@
 
   .shot .launcher-pair-label {
     left: 2px;
+    top: 2px;
+    bottom: auto;
   }
 
   .shot .tp-label {
