@@ -336,6 +336,7 @@ const GameDetails = ({ games, onAddGame, onUpdateGame }) => {
             {currentStep === 1 && (
                 <ShooterInfo 
                     shooters={shooters}
+                    onReorderShooters={setShooters}
                     newShooter={newShooter}
                     setNewShooter={setNewShooter}
                     handleAddShooter={handleAddShooter}

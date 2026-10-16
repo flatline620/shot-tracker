@@ -12,24 +12,44 @@
     display: flex;
     align-items: center; /* Center items vertically */
     gap: 10px; /* Space between shooter name and button */
-    padding: 5px 0; /* Space above and below each list item */
+    padding: 8px 0; /* Space above and below each list item */
     border-bottom: 1px solid #ccc; /* Optional: Border to separate items */
   }
   
   .shooters-section .name-column {
-    width: 200px; /* Fixed width for the name column */
+    flex: 1;
+    min-width: 0;
     overflow: hidden; /* Hide overflow text if it exceeds the column width */
     text-overflow: ellipsis; /* Add ellipsis if text is too long */
+    white-space: nowrap;
+  }
+
+  .shooters-section .drag-handle {
+    flex: 0 0 36px;
+    width: 36px;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: #555;
+    font-size: 22px;
+    line-height: 1;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .shooters-section .drag-handle:active {
+    cursor: grabbing;
   }
   
   .shooters-section .remove-button {
-    margin-left: 100px; /* Margin to align with input fields */
+    flex: 0 0 auto;
+    margin-left: auto;
     padding: 5px 10px; /* Adjust padding for consistency */
     border: none;
     background-color: red; /* Button color */
     color: white;
     cursor: pointer;
-    width: 205px;
+    width: auto;
   }
   
   .shooters-section .remove-button:hover {
@@ -85,6 +105,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 12px;
 }
 
 .info-icon {
