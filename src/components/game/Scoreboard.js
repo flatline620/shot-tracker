@@ -259,6 +259,11 @@ const Scoreboard = () => {
         ) : (
           <>
             <h1>Scoreboard</h1>
+            {location.state?.saveError && (
+              <p role="alert">
+                Progress could not be saved on this device. Keep this page open to avoid losing your game.
+              </p>
+            )}
             <table>
               <thead>
                 <tr>

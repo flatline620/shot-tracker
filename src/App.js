@@ -11,29 +11,55 @@ import './App.css';
 
 const GameRecovery = () => {
   const navigate = useNavigate();
-  const hasCheckedProgress = useRef(false);
+  const [savedProgress, setSavedProgress] = useState(null);
 
   useEffect(() => {
-    if (hasCheckedProgress.current) return;
-    hasCheckedProgress.current = true;
+    setSavedProgress(getSavedGameProgress());
+  }, []);
 
-    const savedProgress = getSavedGameProgress();
-    if (!savedProgress) return;
+  if (!savedProgress) return null;
 
-    const { game, currentShooterIndex } = savedProgress;
-    const shouldResume = window.confirm(`Continue today's saved game "${game.name}"?`);
+  const { game, currentShooterIndex } = savedProgress;
 
-    if (shouldResume) {
-      navigate('/scoreboard', {
-        state: { game, currentShooter: game.shooters[currentShooterIndex] },
-      });
-    } else {
-      clearSavedGameProgress();
-      navigate('/');
-    }
-  }, [navigate]);
-
-  return null;
+  return (
+    <div className="game-recovery-backdrop">
+      <section
+        className="game-recovery-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="game-recovery-title"
+        aria-describedby="game-recovery-description"
+      >
+        <h2 id="game-recovery-title">Resume saved game?</h2>
+        <p id="game-recovery-description">
+          Continue today's saved game "{game.name}"?
+        </p>
+        <div className="game-recovery-actions">
+          <button
+            type="button"
+            onClick={() => {
+              navigate('/scoreboard', {
+                state: { game, currentShooter: game.shooters[currentShooterIndex] },
+              });
+              setSavedProgress(null);
+            }}
+          >
+            Continue Game
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              clearSavedGameProgress();
+              setSavedProgress(null);
+              navigate('/');
+            }}
+          >
+            Discard Saved Game
+          </button>
+        </div>
+      </section>
+    </div>
+  );
 };
 
 const GameNavigationWarning = () => {

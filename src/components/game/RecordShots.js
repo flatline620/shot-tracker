@@ -21,13 +21,15 @@ const RecordShots = () => {
   const [newShot, setNewShot] = useState({ station: initialStation, hit: null });
   const [selectedStation, setSelectedStation] = useState(initialStation);
   const [currentStation, setCurrentStation] = useState(initialStation);
+  const [saveError, setSaveError] = useState(false);
 
   const stationNames = game.stationNames || Array.from({ length: initialShots.length }, (_, i) => `Station ${i + 1}`);
 
   useEffect(() => {
     setShots(shooter.shots || []);
-    setCurrentStation(shooter.currentStation || initialStation);
-  }, [shooter.shots, shooter.currentStation, initialStation]);
+    setSelectedStation(initialStation);
+    setCurrentStation(initialStation);
+  }, [shooter.shots, initialStation]);
 
   useEffect(() => {
     setNewShot(prev => ({ ...prev, station: currentStation }));
@@ -45,6 +47,44 @@ const RecordShots = () => {
   const areCurrentStationShotsComplete = () => {
     const requiredShots = initialShots[currentStation - 1] || 0;
     return requiredShots > 0 && calculateCurrentStationShots().length >= requiredShots;
+  };
+
+  const getCurrentShooterIndex = () => {
+    const index = game.shooters.indexOf(shooter);
+    return index >= 0 ? index : game.shooters.findIndex(s => s.name === shooter.name);
+  };
+
+  const saveProgress = (updatedGame, shooterIndex) => {
+    try {
+      saveGameProgress(updatedGame, shooterIndex);
+      setSaveError(false);
+      return true;
+    } catch (error) {
+      console.error('Unable to save game progress locally:', error);
+      setSaveError(true);
+      return false;
+    }
+  };
+
+  const withCurrentShooterProgress = (updatedShots, station) => {
+    const shooterIndex = getCurrentShooterIndex();
+    if (shooterIndex < 0) return { game, shooterIndex };
+
+    const updatedShooters = game.shooters.map((gameShooter, index) =>
+      index === shooterIndex
+        ? {
+            ...gameShooter,
+            shotsTaken: updatedShots.length,
+            numHits: updatedShots.filter(shot => shot.hit).length,
+            shots: updatedShots,
+          }
+        : gameShooter
+    );
+
+    return {
+      game: { ...game, shooters: updatedShooters, currentStation: station },
+      shooterIndex,
+    };
   };
 
   const recalculateStreak = useCallback(() => {
@@ -85,10 +125,13 @@ const RecordShots = () => {
       if (stationShots.length < initialShots[currentStation - 1]) {
         const newShotIndex = stationShots.length;
         const { currentStreak, maxStreak } = recalculateStreak();
-        setShots(prevShots => [
-          ...prevShots,
+        const updatedShots = [
+          ...shots,
           { ...newShot, hit, shotIndex: newShotIndex, currentStreak, maxStreak }
-        ]);
+        ];
+        setShots(updatedShots);
+        const progress = withCurrentShooterProgress(updatedShots, currentStation);
+        saveProgress(progress.game, progress.shooterIndex);
         setNewShot(prev => ({ ...prev, hit: null }));
       }
     }
@@ -99,8 +142,12 @@ const RecordShots = () => {
     
     if (stationShots.length > 0) {
       const lastShotIndex = stationShots[stationShots.length - 1].shotIndex;
-      
-      setShots(prevShots => prevShots.filter(shot => !(shot.station === currentStation && shot.shotIndex === lastShotIndex)));
+      const updatedShots = shots.filter(
+        shot => !(shot.station === currentStation && shot.shotIndex === lastShotIndex)
+      );
+      setShots(updatedShots);
+      const progress = withCurrentShooterProgress(updatedShots, currentStation);
+      saveProgress(progress.game, progress.shooterIndex);
     }
   };
 
@@ -137,8 +184,14 @@ const RecordShots = () => {
     const updatedGame = { ...game, shooters: updatedShooters, currentStation: findNextIncompleteStation(allShootersDone) };
 
     const nextShooterIndex = findNextShooter(allShootersDone);
-    saveGameProgress(updatedGame, nextShooterIndex);
-    navigate('/scoreboard', { state: { game: updatedGame, currentShooter: updatedShooters[nextShooterIndex] } });
+    const saved = saveProgress(updatedGame, nextShooterIndex);
+    navigate('/scoreboard', {
+      state: {
+        game: updatedGame,
+        currentShooter: updatedShooters[nextShooterIndex],
+        saveError: !saved,
+      },
+    });
   };
 
   const findNextIncompleteStation = (allShootersDone) => {
@@ -181,6 +234,8 @@ const RecordShots = () => {
     if (!isStationComplete) {
       setSelectedStation(newStation);
       setCurrentStation(newStation);
+      const progress = withCurrentShooterProgress(shots, newStation);
+      saveProgress(progress.game, progress.shooterIndex);
     }
   };
 
@@ -189,7 +244,15 @@ const RecordShots = () => {
   };
 
   const handleCancelShooter = () => {
-    navigate('/scoreboard', { state: { game } });
+    const progress = withCurrentShooterProgress(shots, currentStation);
+    const saved = saveProgress(progress.game, progress.shooterIndex);
+    navigate('/scoreboard', {
+      state: {
+        game: progress.game,
+        currentShooter: progress.game.shooters[progress.shooterIndex],
+        saveError: !saved,
+      },
+    });
   };
 
   const renderStationGrid = (stationIndex) => {
@@ -223,6 +286,11 @@ const RecordShots = () => {
   return (
     <div className="record-shots">
       <h1>Record Shots for {shooter.name}</h1>
+      {saveError && (
+        <p role="alert">
+          Progress could not be saved on this device. Keep this page open to avoid losing your game.
+        </p>
+      )}
       <div>
         <label>
           Select Station:
